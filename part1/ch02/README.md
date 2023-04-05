@@ -39,13 +39,12 @@ pirvate List<Ingredient> filterByType(List<Ingredient> ingredients, Type type){
 // 타입 값을 소문자로 만들고 필터 메서드로 타입에 해당하는 성분만 걸러서 model 값에 추가!
 ```
 
-* 뷰 디자인 하기 (타임리프 사용)
+* 뷰 디자인 하기 (타임리프 사용) 
 
-design.html
+design.html 참고
 
+#### + 간단한 타임리프 정리
 ```
-간단한 타임리프 정리
-
 ${...} // 변수 표현식 모델에 담긴 변수에 직접 접근한다
 
 th:src="@{/images/TacoCloud.png} // static 소스 가지고 오기"
@@ -66,6 +65,10 @@ th:each="ingredient : ${wrap}" // 모델로 받은 wrap 값을 for 로 돌림
 th:text="${ingredient.name}"  // 객체 그래프 탐색처럼 성분 객체에서 이름을 꺼낸다
 
 th:value="${ingredient.id}" // 성분 아이디 값을 보내고 서버로 전송
+
 ``` 
+그외 styles.css 참고
+
+* 폼 제출 처리하기
 
 
