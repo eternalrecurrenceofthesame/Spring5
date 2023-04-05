@@ -46,19 +46,26 @@ design.html
 ```
 간단한 타임리프 정리
 
+${...} // 변수 표현식 모델에 담긴 변수에 직접 접근한다
+
 th:src="@{/images/TacoCloud.png} // static 소스 가지고 오기"
 
 th:object="${taco}" // 모델 객체 받기 폼 태그에서 사용
 th:field="*{field}" // object 모델의 필드 값에 접근하기
 
+* th:field 는 정상 상황에서는 모델 객체의 값을 사용하지만, 오류가 발생하면 FieldError 에서 보관한
+입력 값을 재사용해서 출력한다.
+
+
 th:if="${#fields.hasErrors('ingredients')}" // th:if 가 참이면 해당 태그를 출력 거짓이면 출력안함
-       ${#fields.hasErrors('ingredients')}  // BindingResult 가 제공하는 검증 오류에 접근해서 입력 검증
+       ${#fields.hasErrors('ingredients')}  // BindingResult 가 제공하는 검증 오류에 접근해서 입력 오류 체크
 
 th:errors="*{ingredients}" // 해당 필드에 입력 오류가 있으면 오류 메시지를 출력한다.
-
 
 th:each="ingredient : ${wrap}" // 모델로 받은 wrap 값을 for 로 돌림
 th:text="${ingredient.name}"  // 객체 그래프 탐색처럼 성분 객체에서 이름을 꺼낸다
 
 th:value="${ingredient.id}" // 성분 아이디 값을 보내고 서버로 전송
 ``` 
+
+
