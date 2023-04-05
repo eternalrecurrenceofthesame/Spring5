@@ -52,4 +52,4 @@ th:object="${taco}" // 모델값 받기
 th:field="*{field}" // object 모델에서 필드 값 보여주기
 
 th:if="${#fields.hasErrors('ingredients')}" // th:if 가 참이면 해당 태그를 출력 거짓이면 출력안함
-```
+``` 
