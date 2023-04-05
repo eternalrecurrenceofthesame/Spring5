@@ -48,8 +48,17 @@ design.html
 
 th:src="@{/images/TacoCloud.png} // static 소스 가지고 오기"
 
-th:object="${taco}" // 모델값 받기 
-th:field="*{field}" // object 모델에서 필드 값 보여주기
+th:object="${taco}" // 모델 객체 받기 폼 태그에서 사용
+th:field="*{field}" // object 모델의 필드 값에 접근하기
 
 th:if="${#fields.hasErrors('ingredients')}" // th:if 가 참이면 해당 태그를 출력 거짓이면 출력안함
+       ${#fields.hasErrors('ingredients')}  // BindingResult 가 제공하는 검증 오류에 접근해서 입력 검증
+
+th:errors="*{ingredients}" // 해당 필드에 입력 오류가 있으면 오류 메시지를 출력한다.
+
+
+th:each="ingredient : ${wrap}" // 모델로 받은 wrap 값을 for 로 돌림
+th:text="${ingredient.name}"  // 객체 그래프 탐색처럼 성분 객체에서 이름을 꺼낸다
+
+th:value="${ingredient.id}" // 성분 아이디 값을 보내고 서버로 전송
 ``` 
