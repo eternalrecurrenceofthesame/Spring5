@@ -41,3 +41,15 @@ pirvate List<Ingredient> filterByType(List<Ingredient> ingredients, Type type){
 
 * 뷰 디자인 하기 (타임리프 사용)
 
+design.html
+
+```
+간단한 타임리프 정리
+
+th:src="@{/images/TacoCloud.png} // static 소스 가지고 오기"
+
+th:object="${taco}" // 모델값 받기 
+th:field="*{field}" // object 모델에서 필드 값 보여주기
+
+th:if="${#fields.hasErrors('ingredients')}" // th:if 가 참이면 해당 태그를 출력 거짓이면 출력안함
+```
