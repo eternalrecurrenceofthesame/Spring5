@@ -67,6 +67,23 @@ th:text="${ingredient.name}"  // 객체 그래프 탐색처럼 성분 객체에�
 th:value="${ingredient.id}" // 성분 아이디 값을 보내고 서버로 전송
 
 ``` 
+```
+타임리프를 이용한 메시지, 국제화 처리
+
+<label for="itemName" th:text="#{item.itemName}"></label> // 타임리프 #{...} 문법 사용
+
+* messages.properties 
+item.itemName = 아이템 이름
+ 
+* messages_en.properties
+item.itemName = itemName
+
+HTTP accept-language 헤더 값을 통해서 국제화 적용
+
+로케일 정보가 없으면 시스템의 기본 로케일 정보를 호출해서 사용한다 시스템 로케일 정보호출에
+실패하면 디폴트 값을 사용한다.
+```
+
 그외 styles.css 참고
 
 * 폼 제출 처리하기
