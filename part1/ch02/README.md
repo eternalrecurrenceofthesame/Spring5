@@ -62,6 +62,8 @@ th:if="${#fields.hasErrors('ingredients')}" // th:if 가 참이면 해당 태그
 
 th:errors="*{ingredients}" // 해당 필드에 입력 오류가 있으면 오류 메시지를 출력한다.
 
+* 에러를 참조할 때는 span 태그를 사용한다.
+
 th:each="ingredient : ${wrap}" // 모델로 받은 wrap 값을 for 로 돌림
 th:text="${ingredient.name}"  // 객체 그래프 탐색처럼 성분 객체에서 이름을 꺼낸다
 
@@ -121,3 +123,8 @@ DesignTacoController, OrderController
 BindingResult 는 Errors 인터페이스를 상속받아 기능이 조금 더 추가됨 실무에서는 관례상 BindingResult 를 많이 사용
 BindingResult 는 @ModelAttribute 값 다음에 위치해야 한다!
 ```
+
+## 뷰 컨트롤러로 작업하기
+
+지금까지 3 가지의 컨트롤러를 작성하였음 (Home, Order, DesignTaco)
+
