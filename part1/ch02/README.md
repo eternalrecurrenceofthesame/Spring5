@@ -103,5 +103,21 @@ OrderController, Order, orderForm.html 참고
 
 * 유효성 검사 규칙 선언하기
 
-Taco, Order 참고
+Taco, Order 참고 javax.validation 애노테이션을 이용한 검사 추가.
 
+```
+@Digits(ineger=3, fraction=0, message="Invalid CVV") // 입력 값이 정확히 3 자리 숫자인지 검사
+private Strinc ccCVV;
+```
+* 폼과 바인딩될 때 유효성 검사 수행하는 방법
+
+DesignTacoController, OrderController
+
+```
+검증 애노테이션
+@Valid(자바 표준), @Validated(스프링 전용) // @Validated 에는 그룹스 기능이 있는데 잘 사용안함 
+등록에서 필요한 정보와, 수정에서 필요한 정보가 다르기 때문에 그룹으로 검증하지 않고 각각의 폼을 만들어야 한다.
+
+BindingResult 는 Errors 인터페이스를 상속받아 기능이 조금 더 추가됨 실무에서는 관례상 BindingResult 를 많이 사용
+BindingResult 는 @ModelAttribute 값 다음에 위치해야 한다!
+```
