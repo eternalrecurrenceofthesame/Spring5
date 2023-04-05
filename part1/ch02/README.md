@@ -41,9 +41,10 @@ pirvate List<Ingredient> filterByType(List<Ingredient> ingredients, Type type){
 
 * 뷰 디자인 하기 (타임리프 사용) 
 
-design.html 참고
-
 #### + 간단한 타임리프 정리
+
+design.html, orderForm.html 참고
+
 ```
 ${...} // 변수 표현식 모델에 담긴 변수에 직접 접근한다
 
@@ -64,8 +65,9 @@ th:errors="*{ingredients}" // 해당 필드에 입력 오류가 있으면 오류
 th:each="ingredient : ${wrap}" // 모델로 받은 wrap 값을 for 로 돌림
 th:text="${ingredient.name}"  // 객체 그래프 탐색처럼 성분 객체에서 이름을 꺼낸다
 
-th:value="${ingredient.id}" // 성분 아이디 값을 보내고 서버로 전송
+th:value="${ingredient.id}" // 아이디 값을 서버로 전송
 
+th:action="@{/...}" // submit 누르면 해당 URL 호출
 ``` 
 ```
 타임리프를 이용한 메시지, 국제화 처리
@@ -82,10 +84,24 @@ HTTP accept-language 헤더 값을 통해서 국제화 적용
 
 로케일 정보가 없으면 시스템의 기본 로케일 정보를 호출해서 사용한다 시스템 로케일 정보호출에
 실패하면 디폴트 값을 사용한다.
-```
 
-그외 styles.css 참고
+스프링 부트를 사용하면 메시지 소스 빈과 기본 messages 리소스 이름을 사용할 수 있다.
+spring.messages.basename=messages // proprties 기본 값
+```
+그외 styles.css, 메시지 국제화 참고
+
 
 * 폼 제출 처리하기
 
+OrderController, Order, orderForm.html 참고
+
+## 폼 입력 유효성 검사하기
+
+스프링이 제공하는 자바 빈 유효성 검사 API(JSR-303) 을 이용해서 유효성 검사하기!
+
+(스프링 부트 웹 스타터에 자동으로 추가된다 ?? 57p 왜 없지 )
+
+* 유효성 검사 규칙 선언하기
+
+Taco, Order 참고
 
