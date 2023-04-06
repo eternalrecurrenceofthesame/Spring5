@@ -68,4 +68,7 @@ username / member_name 이런 경우 값을 찾아올 때 별칭을 주면 됨
 
 select member_name as username 그러면 값을 조회할 때 카멜로테이션이 정상 적용된다.
 member.setUsername(rs.getString("username")); 
+
+TIP 간소화 버전은 호출할 때 메서드 명으로 사용해야 한다
+ex)Ingredient ingredient = jdbc.queryForObject(sql, param, mapRowToIngredient());
 ```
