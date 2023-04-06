@@ -6,10 +6,7 @@
 ```
 JdbcIngredientRepository 참고
 
-@Autowired // 생성자가 하나면 안 해도 된다.
 private final NamedParameterJdbcTemplate jdbc;
-
-@Autowired
 private final SimpleJdbcInsert jdbcInsert;
 
 public JdbcIngredientRepository(DataSource dataSource) {
@@ -77,5 +74,7 @@ DesignTacoController 참고
 
 * 스키마 정의 및 데이터 추가
 
-정의한 schema.sql 파일은 src/main/resources 폴더에 저장하자
+정의한 schema.sql 파일은 src/main/resources 폴더에 저장하자 data.sql, schema.sql 참고
+
+
 
