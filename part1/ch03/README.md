@@ -2,7 +2,7 @@
 
 ## JDBC 를 사용해서 데이터 읽고 쓰기
 
-* 기본값 설정
+* JdbcIngredientRepository 만들기
 ```
 JdbcIngredientRepository 참고
 
@@ -24,7 +24,6 @@ public JdbcIngredientRepository(DataSource dataSource) {
 NamedParameterJdbcTemplate 를 이용해서 순서가 아닌 이름으로 값을 찾을 수 있다.
 SimpleJdbcInsert 를 사용하면 쉽게 업데이트를 사용할 수 있다.
 ```
-* 메서드 만들기
 ```
 조회 메서드
 String sql = "select id, name, type from Ingredient where id=:id";
@@ -41,7 +40,6 @@ Auto increment 를 사용하면 저장후 키 값을 받아와서 키 값을 지
 
 ingredient.setKey(key);
 ```
-* 매퍼 만들기
 ```
 매퍼 만들기 (수작업)
  private Ingredient mapRowToIngredient(ResultSet rs, int rowNum) throws SQLException {
@@ -72,3 +70,12 @@ member.setUsername(rs.getString("username"));
 TIP 간소화 버전은 호출할 때 메서드 명으로 사용해야 한다
 ex)Ingredient ingredient = jdbc.queryForObject(sql, param, mapRowToIngredient());
 ```
+
+* 컨트롤러에 리포지토리 주입해서 사용하기
+
+DesignTacoController 참고
+
+* 스키마 정의 및 데이터 추가
+
+정의한 schema.sql 파일은 src/main/resources 폴더에 저장하자
+
