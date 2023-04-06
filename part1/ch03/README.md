@@ -2,7 +2,7 @@
 
 ## JDBC 를 사용해서 데이터 읽고 쓰기
 
-* JdbcIngredientRepository
+* 기본값 설정
 ```
 JdbcIngredientRepository 참고
 
@@ -24,6 +24,7 @@ public JdbcIngredientRepository(DataSource dataSource) {
 NamedParameterJdbcTemplate 를 이용해서 순서가 아닌 이름으로 값을 찾을 수 있다.
 SimpleJdbcInsert 를 사용하면 쉽게 업데이트를 사용할 수 있다.
 ```
+* 메서드 만들기
 ```
 조회 메서드
 String sql = "select id, name, type from Ingredient where id=:id";
@@ -40,6 +41,7 @@ Auto increment 를 사용하면 저장후 키 값을 받아와서 키 값을 지
 
 ingredient.setKey(key);
 ```
+* 매퍼 만들기
 ```
 매퍼 만들기 (수작업)
  private Ingredient mapRowToIngredient(ResultSet rs, int rowNum) throws SQLException {
