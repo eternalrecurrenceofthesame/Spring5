@@ -11,7 +11,6 @@ Taco, Ingredient 참고
 * 컨트롤러 생성
 
 DesignTacoController 참고
-
 ```
 요청-대응 애노테이션
 
@@ -128,9 +127,9 @@ BindingResult 는 @ModelAttribute 값 다음에 위치해야 한다!
 
 지금까지 3 가지의 컨트롤러를 작성하였음 (Home, Order, DesignTaco)
 
-모델을 정의하지 않거나 사용자 입력처리를 하지않는 home controller 를 WebMvcConfigurer 인터페이스를 
+모델을 정의하지 않거나 사용자 입력처리를 하지않는 home controller 는 WebMvcConfigurer 인터페이스를 
 
-이용하여 간소하게 만들어보기 인터페이스지만 메서드의 기본 구현을 제공
+이용하여 간소하게 만들 수 있다. (인터페이스지만 메서드의 기본 구현을 제공)
 
 ```
 @Configuration
@@ -142,3 +141,21 @@ public class WebConfig implements WebMvcConfigurer {
 ```
 ViewControllerRegistry 는 하나 이상의 뷰 컨트롤러를 등록할 수 있다.
 
+## 뷰 템플릿 라이브러리 선택하기
+
+spring-boot-starter-thymeleaf 를 xml 에 추가하면 스프링 부트가 애플리케이션 시작 시점에
+
+타임리프를 찾고 빈으로 등록 해준다. (/templates 티렉토리에 템플릿만 작성하면 됨)
+
+* 템플릿 캐싱이란?
+
+기본적으로 템플릿은 최초 사용 시점에 한번만 파싱(코드 분석) 되어 파싱된 결과를 캐싱해서 사용한다.
+
+(불필요한 파싱을 방지해서 성능의 향상)
+
+```
+spring.thymeleaf.chache=false 설정을 사용하면 템플릿 캐싱을 끌 수 있다 하지만
+
+직접 설정하는 대신 DevTools 를 사용하는 것이 더 유용하다. 모든 템플릿 라이브러리에
+적용할 수 있고 배포시 DevTools 자신이 스스로 비활성화 되어 템플릿 캐싱이 활성화됨.
+```
