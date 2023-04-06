@@ -7,35 +7,31 @@
 JdbcIngredientRepository 참고
 
 private final NamedParameterJdbcTemplate jdbc;
-private final SimpleJdbcInsert jdbcInsert;
 
 public JdbcIngredientRepository(DataSource dataSource) {
   this.jdbc = new NamedParameterJdbcTemplate(dataSource);
+}
 
-  this.jdbcInsert = new SimpleJdbcInsert(dataSource)
-                 .withTableName("Ingredient");  저장 테이블
-                //.usingGeneratedKeyColumns("id") Auto 로 key 를 생성하는 칼럼 값을 지정한다.
-                //.usingColumns(...)  xinsert 할 칼럼 생략 가능 특정 컬럼만 업데이트
-    }
-
-NamedParameterJdbcTemplate 를 이용해서 순서가 아닌 이름으로 값을 찾을 수 있다.
-SimpleJdbcInsert 를 사용하면 쉽게 업데이트를 사용할 수 있다.
+NamedParameterJdbcTemplate 를 이용해서 순서가 아닌 이름으로 조회,수정,저장 
 ```
 ```
-조회 메서드
+이름으로 sql 파라미터 값 저장하기
+
+* Map 사용
 String sql = "select id, name, type from Ingredient where id=:id";
-
 Map<String, Object> param = Map.of("id", id);
+
 jdbc.queryForObject(sql, param, this::mapRowToIngredient);
 
-저장 메서드
-SqlParameterSource param = new BeanPropertySqlParameterSource(ingredient);
-jdbcInsert.execute(param);
+* MapSqlParameterSource 사용
+String sql = "insert into Ingredient (id, name, type) values (:id, :name, :type)";
 
-Number key = jdbcInsert.executeAndReturnKey(param);
-Auto increment 를 사용하면 저장후 키 값을 받아와서 키 값을 지정해주면 된다.
+SqlParameterSource param = new MapSqlParameterSource()
+                .addValue("id", ingredient.getId())
+                .addValue("name", ingredient.getName())
+                .addValue("type", ingredient.getType().toString());
 
-ingredient.setKey(key);
+jdbc.update(sql,param);
 ```
 ```
 매퍼 만들기 (수작업)
