@@ -40,3 +40,30 @@ Auto increment 를 사용하면 저장후 키 값을 받아와서 키 값을 지
 
 ingredient.setKey(key);
 ```
+```
+매퍼 만들기 (수작업)
+ private Ingredient mapRowToIngredient(ResultSet rs, int rowNum) throws SQLException {
+      return new Ingredient(
+           rs.getString("id"),
+           rs.getString("name"),
+           Ingredient.Type.valueOf(rs.getString("type")));
+    }
+
+매퍼 만들기 (간소)
+private RowMapper<Ingredient> mapRowToIngredient(){
+ return BeanPropertyRowMapper.newInstance(Ingredient.class);
+}
+
+간소화 매퍼를 만들 때 데이터베이스 컬럼 명과 클래스 필드값이 다름 자바는 카멜로테이션을 사용하지만 
+데이터베이스는 _ 표기로 구분함
+
+itemName / item_name 이런 경우 매핑시 카멜로테이션 규칙을 이용해서 set 메서드를 만들어줌
+Item item = new Item();
+item.setItemName(rs.getString("item_name"));
+
+문제는 데이터베이스 칼럼명과 클래스 필드값이 위 규칙으로 적용되지 않는 경우임
+username / member_name 이런 경우 값을 찾아올 때 별칭을 주면 됨
+
+select member_name as username 그러면 값을 조회할 때 카멜로테이션이 정상 적용된다.
+member.setUsername(rs.getString("username")); 
+```
