@@ -128,3 +128,17 @@ BindingResult 는 @ModelAttribute 값 다음에 위치해야 한다!
 
 지금까지 3 가지의 컨트롤러를 작성하였음 (Home, Order, DesignTaco)
 
+모델을 정의하지 않거나 사용자 입력처리를 하지않는 home controller 를 WebMvcConfigurer 인터페이스를 
+
+이용하여 간소하게 만들어보기 인터페이스지만 메서드의 기본 구현을 제공
+
+```
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/").setViewName("home");
+    }}
+```
+ViewControllerRegistry 는 하나 이상의 뷰 컨트롤러를 등록할 수 있다.
+
