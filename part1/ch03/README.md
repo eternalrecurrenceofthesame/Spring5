@@ -2,7 +2,7 @@
 
 ## JDBC 를 사용해서 데이터 읽고 쓰기
 
-* JdbcIngredientRepository 만들기
+#### + JdbcIngredientRepository 만들기
 ```
 JdbcIngredientRepository 참고
 
@@ -71,6 +71,25 @@ DesignTacoController 참고
 * 스키마 정의 및 데이터 추가
 
 정의한 schema.sql 파일은 src/main/resources 폴더에 저장하자 data.sql, schema.sql 참고
+
+#### ++ JdbcTacoRepository
+
+우리가 만든 타코는 컬렉션으로 성분값을 가지고 있음 하지만 데이터베이스는 컬렉션을 저장할 수 없다!
+
+그렇기 때문에 |타코 - * 타코_성분 * - 성분| 3 개의 테이블을 만들어서 관리하면 된다.
+
+* 기본키 전략으로 Identity 를 사용할때 데이터베이스에 저장된 키값 가지고오는 방법 (JDBC)
+```
+KeyHolder keyHolder = new GeneratedKeyHolder();
+jdbc.update(sql, param, keyHolder);
+
+return keyHolder.getKey().longValue();
+
+키홀더를 만들고 sql, 파라미터, 키홀더 값을 같이 넘겨주면 된다!
+```
+JdbcTacoRepository 참고
+
+* DesignTacoController 
 
 
 
