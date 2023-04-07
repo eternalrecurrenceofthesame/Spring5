@@ -146,3 +146,12 @@ OrderController 참고
 JdbcIngredientRepository 에서 아이디 값으로 Ingredient 객체를 찾아서 반환하는 컨버터 클래스 
 
 IngredientByIdConverter 참고
+
+#### ++ 내장 H2 데이터베이스를 인터넷 클라이언트에서 사용해보기
+```
+DevTools + H2 데이터베이스를 사용하면 웹 브라우저에서 사용할 수 있는 H2 콘솔을 제공해준다 28p
+
+localhost:8080/h2-console 
+JDBC URL: jdbc:h2:mem:testdb
+user: sa
+```
