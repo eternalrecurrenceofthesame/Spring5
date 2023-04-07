@@ -6,3 +6,8 @@
 몽고DB, Neo4, 레디스, 카산드라
 ```
 
+여기서는 SpringDataJpa 를 사용하겠음!
+
+## 도메인 객체에 애노테이션 추가하기
+
+* Ingredient
