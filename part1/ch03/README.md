@@ -3,9 +3,10 @@
 ## JDBC 를 사용해서 데이터 읽고 쓰기
 
 #### + JdbcIngredientRepository 만들기
-```
+
 JdbcIngredientRepository 참고
 
+```
 private final NamedParameterJdbcTemplate jdbc;
 
 public JdbcIngredientRepository(DataSource dataSource) {
@@ -74,6 +75,8 @@ DesignTacoController 참고
 
 #### ++ JdbcTacoRepository
 
+JdbcTacoRepository 참고
+
 우리가 만든 타코는 컬렉션으로 성분값을 가지고 있음 하지만 데이터베이스는 컬렉션을 저장할 수 없다!
 
 그렇기 때문에 |Taco, TacoIngredient, Ingredient| 3 개의 테이블을 만들어서 관리하면 된다.
@@ -87,7 +90,6 @@ return keyHolder.getKey().longValue();
 
 키홀더를 만들고 sql, 파라미터, 키홀더 값을 같이 넘겨주면 된다!
 ```
-JdbcTacoRepository 참고
 
 * DesignTacoController 
 ```
@@ -98,6 +100,9 @@ JdbcTacoRepository 참고
 ```
 
 #### + JdbcOrderRepository
+
+JdbcOrderRepository 참고
+
 ```
 SimpleJdbcInsert 을 이용해서 insert sql 간소화 하기
 
@@ -125,9 +130,10 @@ values.put("taco", taco.getId);
 
 orderTacoInserter.execute(values);
 
-파라미터 값을 직접 넣고 싶다면 Map 객체를 만들고 SimpleJdbcInsert 를 사용하면 된다.
-
-JdbcOrderRepository 참고
+칼럼과 파라미터 값을 직접 넣고 싶다면 Map 객체를 만들고 SimpleJdbcInsert 를 사용하면 된다.
 ```
+
+* OrderController
+
 
 
