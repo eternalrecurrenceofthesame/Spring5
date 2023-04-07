@@ -155,3 +155,17 @@ localhost:8080/h2-console
 JDBC URL: jdbc:h2:mem:testdb
 user: sa
 ```
+
+## th:each 를 사용해서 타코 이름 보여주기 
+
+orderForm.html
+
+```
+<ul>
+  <li th:each="taco : ${order.tacos}">
+    <span th:text="${taco.name">taco name</span>
+  </li>
+</ul> 
+
+each 로 값을 하나씩 빼와서 주문 한 타코 이름을 보여준다! 
+```
