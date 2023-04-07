@@ -79,7 +79,7 @@ JdbcTacoRepository 참고
 
 우리가 만든 타코는 컬렉션으로 성분값을 가지고 있음 하지만 데이터베이스는 컬렉션을 저장할 수 없다!
 
-그렇기 때문에 |Taco, TacoIngredient, Ingredient| 3 개의 테이블을 만들어서 관리하면 된다.
+그렇기 때문에 | Taco, TacoIngredient, Ingredient | 3 개의 테이블을 만들어서 관리하면 된다.
 
 * 기본키 전략으로 Identity 를 사용할때 데이터베이스에 저장된 키값 가지고오는 방법 (JDBC)
 ```
@@ -93,7 +93,7 @@ return keyHolder.getKey().longValue();
 
 * DesignTacoController 
 ```
-@SessionAttributes("order") ??
+@SessionAttributes("order") 
 
 주문은 다수의 HTTP 요청에 걸쳐 존재해야 한다. 다수의 타코를 생성하고 하나의 주문으로
 추가하기 위해 모델 정보를 http 세션값에 저장해서 응답
