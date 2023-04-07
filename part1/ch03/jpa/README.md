@@ -38,4 +38,28 @@ public void run(Sring... args) throws Exception{
 } TacoCloudApplication 참고
 ```
 
+## 기본적인 CURD 이외의 커스텀 쿼리 사용하기
+```
+* 특정 ZIP 코드로 배달된 모든 주문 데이터를 데이터베이스에서 가지고 와야 할 때
+-> List<Order> findByDeliveryZip(String deliveryZip);
 
+스프링 데이터는 주문 객체를 찾아야 한다는 것을 이미 알고 있다 상속 받을 때 데이터 
+자료형과 키 자료형을 알려줬기 때문
+
+* 지정된 일자 범위 내에서 특정 ZIP 코드로 배달된 모든 주문을 쿼리하기
+-> List<Order> readOrdersByDeliveryZipAndPlacedAtBetween
+     (String deliveryZip, Data startDate, Data endDate);
+     
+* 대소문자 무시하고 값 가지고 오기
+List<Order> findByDeliveryToAndDeliveryCityAllIgnoresCase
+(String deliveryTo, String deliveryCity);
+
+* 지정된 열을 기준으로 정렬해서 값을 가지고 오기
+List<Order> findByDeliveryCityOrderByDeliveryTo(String city);
+
+메서드 쿼리만으로 표현하기 복잡하고 길어진다면 @Query 를 이용한 JPQL 을 사용하면 된다!
+```
+
+간략하게 JPA 를 이용해서 기존의 JDBC 템플릿을 대체했다. JPA 에 대한 자세한 내용은
+
+JPA 리포지토리를 참고
