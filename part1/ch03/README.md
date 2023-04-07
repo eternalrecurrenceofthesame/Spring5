@@ -109,6 +109,25 @@ this.orderInserter = new SimpleJdbcInsert(dataSource)
                 //.usingColumns(" ... ") insert 칼럼을 지정하고 싶을 때 사용
 ```
 ```
+SimpleJdbcInsert 를 사용할 때 파라미터 값을 매핑하는 방법
 
+private ObjectMapper objectMapper;
+this.objectMapper = new ObjectMapper();
 
+Map<String, Object> values = objectMapper.convertValue(order, Map.class);
+orderInserter.executeAndReturnKey(values).longValue();
+
+오브젝트 매퍼를 만들고 객체를 맵 파라미터로 바꾼 다음 SimpleJdbcInsert 로 execute 하면 된다.
+
+Map<String, Object> values = new HashMap();
+values.put("tacoOrder", orderId);
+values.put("taco", taco.getId);
+
+orderTacoInserter.execute(values);
+
+파라미터 값을 직접 넣고 싶다면 Map 객체를 만들고 SimpleJdbcInsert 를 사용하면 된다.
+
+JdbcOrderRepository 참고
 ```
+
+
