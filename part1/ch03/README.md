@@ -135,5 +135,14 @@ orderTacoInserter.execute(values);
 
 * OrderController
 
+주문 컨트롤러에서는 타코 디자인 컨트롤러에서 받은 세션값을 받고 주문을 데이터베이스에 저장한 후
 
+세션을 완료해서 이전 세션값을 초기화한다.
 
+OrderController 참고 
+
+* IngredientByIdConverter
+
+JdbcIngredientRepository 에서 아이디 값으로 Ingredient 객체를 찾아서 반환하는 컨버터 클래스 
+
+IngredientByIdConverter 참고
