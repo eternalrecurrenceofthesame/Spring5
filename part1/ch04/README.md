@@ -99,10 +99,52 @@ PasswordEncoder 를 구현한 평문 인코더를 만듦!
 ```
 비밀번호를 암호화 하지 않은 것은 테스트할 때만 사용한다!
 
+```
+* JDBC 기반 auth 전체 메서드
+
+@Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.jdbcAuthentication()
+                .dataSource(dataSource)
+                .usersByUsernameQuery(
+                        "select username, password, enabled from users where username=?")
+                .authoritiesByUsernameQuery(
+                        "select username, authority from authorities where username=?")
+                .passwordEncoder(new NoEncodingPasswordEncoder());
+}
+```
+
 ### LDAP 기반 사용자 스토어
 
 스프링 시큐리티 저장소에 시큐리티 내용만 전문적으로 정리할 것이기 때문에 보류
 
 ### 사용자 인증의 커스터마이징
 
-사용자 데이터를 JPA 를 이용해서 저장하고 처리해보자! 
+사용자 데이터를 JPA 를 이용해서 저장하고 처리해보자! 간단한 유저 정보를 만듦 시큐리티 사용자 
+
+세부 정보에서 사용할 유저 디테일 계약을 구현. User 참고
+
+스프링 데이터로 이름으로 유저를 찾는 간단한 메소드 생성 Userepository 참고
+
+유저 디테일과 스프링 데이터 리포지토리를 이용하는 UserRepositoryUserDetailsService 구현
+
+```
+* User, UserRepository, UserRepositoryUserDetailsService 를 바탕으로 시큐리터 설정
+
+SecurityConfig 참고 
+
+@Autowired
+private UserDetailsService userDetailsService;
+
+@Bean
+public PasswordEncoder encoder(){
+  return new BCryptPasswordEncoder();} 
+
+@Override
+protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+  auth.userDetailsService(userDetailsService).passwordEncoder(encoder());}
+
+유저 디테일 서비스를 주입받아서 간단하게 메서드 리팩토링!
+```
+
+
