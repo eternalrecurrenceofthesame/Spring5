@@ -1,0 +1,32 @@
+spring:
+  profiles:
+    active:
+
+  datasource:
+    url:
+    username:
+    password:
+    driver-class-name:
+    schema:
+    data:
+    jndi-name:
+
+server:
+  port:
+  ssl:
+    key-store:
+    key-store-password:
+    key-password:
+
+logging:
+  path:
+  file:
+  level:
+    root:
+    org:
+      springframework:
+        security:
+
+taco:
+  orders:
+    pageSize:
