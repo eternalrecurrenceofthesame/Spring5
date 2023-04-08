@@ -121,12 +121,114 @@ taco:
 private final int pageSize = 20; // 필드 값으로 페이지 사이즈를 설정
 Pageable pageable = PageRequest.of(0, pageSize); // 페이지 사이즈 값을 받아와서 사용
 
-이때 페이지 값을 필드에 설정해서 페이징을 사용해도 되고, 야믈에 글로벌 설정값을 줘도 된다.
+애플리케이션 프로덕션 중 설정 정보를 변경해야 한다면 yml 에서 간단히 값만 수정해주면 된다. 179p
+
 ```
 ```
 * 구성 속성 홀더 정의하기
 
 구성 속성 전용 클래스를 만들어서 관리해보기 
 
+OrderProps 클래스에 사이즈 필드와 @ConfigurationProperties 를 이용해서 구성 속성 클래스를
+만들고 빈으로 등록했다.
+
+주문의 변경 포인트를 하나로 모았기 떄문에 변경이 필요하면 이 클래스의 값만 바꿔주면 된다.
+
+또 @Validated 애노테이션을 사용할 수 있어서 입력 검증까지 가능함! 
+
+주문 컨트롤러에서는 OrderProps 빈을 DI 받아서 사용하면 된다.
+
+OrderProps 참고
+
+@ConfigurationProperties 를 사용해서 구성 속성 클래스를 만들고 yml 을
+이용해서 손쉽게 값을 설정할 수 있으며 속성 값 검증까지 할 수 있다.
 ```
 
+```
+* 구성 속성 메타데이터 선언하기
+
+구성 속성 메타데이터는 만들어주지 않아도 동작함, 메타데이터가 있으면 구성 속성에
+관한 최소한의 정보를 제공해주므로 유용하다.
+
+pom.xml 에 스프링 부트 구성 처리기 의존성 추가 pom 참고
+커스텀 구성 속성에 관한 메타 데이터를 생성하려면
+
+src/main/resources/META-INF -> additional-spring-configuration-metadata.json 참고
+```
+
+## 프로파일을 사용해서 구성하기
+
+```
+프로파일을 설정해서 개발 환경, 운영 환경 등 각 환경에 따라 다른 
+구성 정보를 사용하기
+```
+
+### 프로파일 정의하고 활성화하기
+```
+* 프로파일 정의
+
+application-{프로파일 이름}.yml
+application-{프로파일 이름}.properties
+
+또는 yaml 구성에서 ---(하이픈 3 개) 를 추가해서 프로파일을 구분할 수 있다.
+
+logging:
+  level:
+    tacos: DEBUG
+---
+spring:
+  profiles: prod  // prod 프로파일에는 다른 로깅 레벨 설정
+  datasource:
+
+
+logging:
+  level:
+  tacos: WARN
+```
+```
+* 프로파일 활성화 방법
+
+Spring:
+  profiles:
+    active:
+    - prod
+    - audit 
+
+기본 yml 파일에서 프로파일을 활성화 할 수 있음 하지만 추천하지 않는 방법임
+특정 환경을 분리하기 위해 프로파일을 사용하는 장점을 살릴 수 없다??
+
+
+환경 변수 설정
+% export SPRING_PROFILES_ACTIVE=prod
+
+JAR 파일로 애플리케이션 실행시
+% java -jar taco-cloud.jar --spring.profiles.active=prod
+
+여러 개의 프로파일을 적용하려면 콤마로 구분하면 됨 prod,audit,ha ...
+```
+
+### 프로파일을 사용해서 조건별 빈 생성
+각각의 프로파일 구성 속성에 적합한 빈을 제공하는 것이 유용할 때가 있음.
+
+자바 구성 클래스에 선언된 빈은 활성화되는 프로파일과는 무관하게 생성됨 
+
+특정 프로파일을 활성화 할 때만 생성해야하는 빈이 있다면 @Profile 애노테이션을 사용하자
+
+```
+* @Profile 적용 예시
+
+@Configuration 클래스를 사용해서 구성 클래스를 등록하거나
+@Bean 을 사용해서 부트스트랩 클래스에 빈을 등록하는 경우
+
+클래스 레벨과 메서드 레벨로 @Profile("...") 애노테이션을 적용하면 된다.
+
+@Bean
+@Profile({"dev","qa"})
+public CommandLineRunner dataLoader (...)
+
+@Profile({"!prod","!qa"})
+@Configuration
+public class DevelopmentConfig
+
+이때 ! 을 사용하면 해당 프로파일이 활성화 되지 않으면 값을 적용한다는 의미임
+```
