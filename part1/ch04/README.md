@@ -232,7 +232,29 @@ ex) <form method="post" th:action="@{/login}" id="loginForm">
 
 ```
 * Order
-주문 테이블에 사용자 정보를 추가
+주문 테이블에 사용자 정보 추가
 
 private User user;
 ```
+```
+* OrderController 참고
+
+주문 처리 컨트롤러에서 인증된 사용자가 누구인지 결정하기
+@AuthenticationPrincipal 을 사용하면 인증된 사용자 정보를 읽어와서 User 를 만들어준다.
+
+@GetMapping("/current") 으로 폼을 요청하면 인증사용자 정보의 값을 읽어와서 사용자 값을 채우고
+모델로 값을 넘겨주면 된다.
+```
+```
+* DesignTacoController 참고
+
+타코를 디자인할 때 사용자 이름을 보여주기 위해 디자인 컨트롤러에서도 사용자를 활용했다.
+Principal 을 매개변수로 받고 요청 사용자 이름을 찾은 다음 데이터베이스에서 사용자를 불러와서
+모델 값으로 넘겨줌!
+```
+
+### 로그아웃 버튼을 추가하고 사용자 정보 보여주기
+
+로그아웃 버튼과 사용자 정보를 보여주는 필드를 각 폼에 추가해보겠음
+
+home, design, orderForm html 에 로그인 추가.
