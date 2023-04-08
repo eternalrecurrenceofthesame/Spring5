@@ -178,7 +178,48 @@ RegistrationForm, RegistrationController, registration.html, 참고
 HTTP 요청 처리를 허용하기 전 충족되어야 할 특정 보안 조건 구성
 커스텀 로그인 페이지 구성
 사용자가 애플리케이션 로그아웃을 할 수 있도록 구성
-CSRF 공격으로 부터 보호하도록 구성 
+CSRF(URL 추출, 위조요청) 공격으로 부터 보호하도록 구성 
+```
+```
+* 웹 요청 보안 처리하기 SecurityConfig 참고, 150p 
+http
+     .authorizeRequests()
+     .antMatchers("/design","/orders").access("hasRole('ROLE_USER')")// 지정된 경로의 접근 권한을 검사
+     .antMatchers("/","/**").access("permitAll") // 모든 접근 허용
+     .and()
+     .formLogin().loginPage("/login") // 로그인 폼으로 login.html 설정
+     .and()
+     .logout().logoutSuccessUrl("/") // 로그아웃 Url 설정
+     .and().csrf(); //csrf 옵션 활성화
+
+로그인에 성공하면 사용자가 처음 요청한 로그인이 필요한 페이지로 이동한다
+```
+기타 사용자 설정
+```
+* 로그인
+
+로그인과 패스워드 이름을 user, pwd 로 변경하면 따로 설정해야 한다.
+.loginPage("/login").loginProcessingUrl("/login).usernameParameter("user")...
+
+사용자가 직접 로그인요청을 시도해서 로그인에 성공한 경우 이동할 페이지 지정
+.formLogin().loginPage("/login").defaultSuccessUrl("/design")
+                        ("/design", true) true 옵션을 주면 어디서 요청했든 항상 design 으로 간다     
 ```
 
+### CSRF 공격 방어하기
 
+CSRF 란?
+
+로그인한 사용자를 대상으로 URL 요청을 악의적으로 조작해서 공격자 웹 사이트로 이동시키는 것
+
+스프링 시큐리티에는 내장된 CSRF 방어 기능이 있다. CSRF 공격을 막기 위해 HTML 히든 필드로 
+
+CSRF 토큰을 넣고 서버에서 해당 토큰의 요청을 확인한다.
+
+타임리프를 사용하면 form 요소의 속성 중하나를 th 타임리프 속성으로 만들면  토큰을 히든 필드로
+
+넘겨준다.
+
+ex) <form method="post" th:action="@{/login}" id="loginForm">
+        
+스프링 시큐리티가 지원하는 CSRF 옵션은 절대 비활성화 하지말자!!         
