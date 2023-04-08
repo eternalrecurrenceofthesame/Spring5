@@ -257,4 +257,4 @@ Principal 을 매개변수로 받고 요청 사용자 이름을 찾은 다음 �
 
 로그아웃 버튼과 사용자 정보를 보여주는 필드를 각 폼에 추가해보겠음
 
-home, design, orderForm html 에 로그인 추가.
+home, design, orderForm html 에 로그 아웃 추가.
