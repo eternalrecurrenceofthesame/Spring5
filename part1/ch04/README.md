@@ -139,12 +139,46 @@ private UserDetailsService userDetailsService;
 @Bean
 public PasswordEncoder encoder(){
   return new BCryptPasswordEncoder();} 
+  
+빈으로 BCryptPasswordEncoder 를 등록해서 사용할 수 있게 설정   
 
 @Override
 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
   auth.userDetailsService(userDetailsService).passwordEncoder(encoder());}
+  
+유저 디테일 서비스와 인코더를 직접 만들고 시큐리티에서 호출할 수 있게 설정을 리팩토링 했다.
+```
 
-유저 디테일 서비스를 주입받아서 간단하게 메서드 리팩토링!
+### 사용자 등록하기
+
+앞서 만든 사용자 명세 시큐리티를 이용해서 사용자를 등록하는 컨트롤러와 폼 뷰를 만들어보기
+
+```
+* RegistrationController(사용자 등록 컨트롤러) 
+
+앞서 만든 유저 리포지토리와 빈으로 등록될 패스워드 인코더(BYCrypti 방식) 를 주입받고 폼으로 넘어온
+유저 정보를 유저 인스턴스로 만들어서 저장한다 이때 인코더로 인코딩한 값을 비밀번호로 저장! 
+
+RegistrationForm, RegistrationController, registration.html, 참고
+```
+
+## 웹 요청 보안 처리하기
+
+보안 규칙을 적용하기! 특정 페이지는 접근 가능하고 특정 페이지는 로그인 해야 접근 할 수 있게 만들어보자!
+
+### 웹 요청 보안 처리하기
+
+웹 요청을 보안처리하기 위해서는 시큐리티체인 or configure(HttpSecurity http) 를 구현해야 함. 앞서 설명했지만
+
+예제를 만들기 때 WebSecurityConfigurerAdapter 를 사용해서 간단하게 만들어 보겠음.
+
+```
+* HttpSecurity 를 사용해서 구성할 수 있는 것
+
+HTTP 요청 처리를 허용하기 전 충족되어야 할 특정 보안 조건 구성
+커스텀 로그인 페이지 구성
+사용자가 애플리케이션 로그아웃을 할 수 있도록 구성
+CSRF 공격으로 부터 보호하도록 구성 
 ```
 
 
