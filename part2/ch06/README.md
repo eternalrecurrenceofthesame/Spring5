@@ -23,7 +23,7 @@ SPA 가 항상 MPA 보다 좋은 선택은 아니다. SPA 를 사용하면 백�
 
 ### 서버에서 데이터 가져오기
 
-레스트 컨트롤러를 만들어서 외부 애플리케이션과 API 통신해보기!
+Rest 컨트롤러를 만들고 외부 애플리케이션과 API 통신해보기!
 
 api.DesignTacoController 참고
 
@@ -94,5 +94,12 @@ public Order patchOrder(@PathVariable("orderId") Long orderId,
 
 ResponseEntity<>(null, HttpStatus.NOT_FOUND); 굳이 반환한다면 not found 
 ```
+
+## 하이퍼미디어 사용하기
+
+하이퍼미디어란? JSON 응답에 
+
+
+### 하이퍼링크 추가하기 
 
 
