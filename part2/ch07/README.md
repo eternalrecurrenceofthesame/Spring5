@@ -44,5 +44,28 @@ RestTemplate 을 사용하는 메서드들에 대해서 알아봤다. 하지만 
 
 ### TacoCloudClient(Traverson) 참고
 
+```
+* ParameterizedTypeReference<>(){};
 
+Traverson 으로 REST API 를 호출하기 위해서는 타입 정보 <CollectionModel<Ingredient>> 를  
+알아야 하는데 자바에서는 런타임시에 제네릭 타입의 정보가 소거되기 때문에 리소스 타입을 지정하기 어렵다!
+
+그래서 
+
+ParameterizedTypeReference<CollectionModel<Ingredient>> ingredientType
+                 = new ParameterizedTypeReference<>() {}; // 타입 지정
+을 이용해서 리소스 타입을 지정해줘야 한다.
+
+CollectionModel<Ingredient> ingredientsRes = traverson
+                 .follow("ingredients")
+                 .toObject(ingredientType); // 읽어들이는 데이터의 객체 타입
+```
+```
+Traverson 을 사용하면 HATEOAS 가 활성화된 API 를 이동하면서 해당 API 리소스를 쉽게 가져올 수 있다
+하지만 리소스를 쓰거나 삭제하는 메서드를 제공하지 않기 때문에
+
+적절하게 RestTemplate 을 섞어서 사용해야 한다. addIngredient 메서드 
+
+rest.postForObject: HTTP POST 응답 몸체와 연결된 객체 반환
+```
 
