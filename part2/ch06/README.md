@@ -158,6 +158,8 @@ API 응답을 할 수 있다.
 도메인을 외부로 노출시키지 않고 API 용 리소스를 만듦으로서 엔티티를 외부에 노출시키지 
 않을 수 있으며 필요한 값만 보여줄 수 있다.
 
+참고로 리소스 클래스는 기본 생성자를 가지고 있어야 한다.
+
 TacoResource, TacoResourceAssembler 참고 
 IngredientReesource, IngredientResourceAssembler 참고
 
@@ -186,8 +188,41 @@ TacoResource
 ```
 * DesignTacoController 
 
-타코 리소스 링크와 성분 리소스 링크 값을 호출하는 메서드 완성본
+@GetMapping("/recent")
+    public CollectionModel<TacoResource> recentTacos(){
+        PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
+        List<Taco> tacos = tacoRepository.findAll(page).getContent();
+        log.info("taco =" + tacos.get(0).toString());
 
+        CollectionModel<TacoResource> tacoResources = new TacoResourceAssembler().toCollectionModel(tacos);
 
+        Link link = linkTo(methodOn(DesignTacoController2.class).recentTacos()).withRel("recents");
+        tacoResources.add(link);
 
+        return tacoResources;
+    }
+
+EntityResponse<> 를 리턴 타입으로 받으면 HTTP 상태표시도 지정할 수 있다.
+Resource, Assembler 참고
+```
+```
+* embedded 관계 이름 짓기
+
+리소스를 제이슨으로 반환하면 클래스 명에 맞춰서 embedded 이름이 생김 이 이름을 다른 곳에서
+사용하고 있는데 클래스 이름을 리팩토링 한다면(그럴 일은 거의 없지만) 사용하는 곳에서 오류가 생긴다.
+
+이를 방지하기 위해 리소스 클래스에 @Relation(value="taco", collectionRelation="tacos) 를 설정하면
+클래스 이름이 변경되더라도 제이슨 임베디드 이름은 값을 통일 할 수 있다.
+
+```
+
+### 데이터 기반 서비스 활성화 하기
+
+```
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-data-rest</artifactId>
+</dependency>
+
+이 의존성을 추가하면 간단한 API 호출로 데이터베이스 값을 가져올 수있다! 
 ```
