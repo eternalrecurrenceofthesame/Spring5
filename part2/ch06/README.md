@@ -211,8 +211,12 @@ Resource, Assembler 참고
 리소스를 제이슨으로 반환하면 클래스 명에 맞춰서 embedded 이름이 생김 이 이름을 다른 곳에서
 사용하고 있는데 클래스 이름을 리팩토링 한다면(그럴 일은 거의 없지만) 사용하는 곳에서 오류가 생긴다.
 
-이를 방지하기 위해 리소스 클래스에 @Relation(value="taco", collectionRelation="tacos) 를 설정하면
+이를 방지하기 위해 Resource 클래스에 @Relation(value="taco", collectionRelation="tacos) 를 설정하면
 클래스 이름이 변경되더라도 제이슨 임베디드 이름은 값을 통일 할 수 있다.
+
+"_embedded" :
+    "tacoResourceList":
+     -> "tacos" 이렇게 변경됨 통일된 JSON 이름을 가지게 된다.  
 
 ```
 
@@ -224,5 +228,74 @@ Resource, Assembler 참고
 <artifactId>spring-boot-starter-data-rest</artifactId>
 </dependency>
 
-이 의존성을 추가하면 간단한 API 호출로 데이터베이스 값을 가져올 수있다! 
+이 의존관계를 설정하면 스프링 데이터 리포지토리에 사용되는 엔티티를 API 요청으로
+데이터베이스에서 쉽게 호출할 수 있다.
+
+스프링 데이터 REST 를 사용하려면 @RestController 를 비활성화 해야한다.
 ```
+```
+* SpringDataRest 사용 예시
+
+localhost:8080/ingredients
+localhost:8080/tacoes 
+
+스프링 데이터 API 를 호출하려면 저장 타입을 복수형으로 호출하면 된다. GET 뿐만 아니라
+POST,PUT,DELETE 메서드도 지원한다!
+
+기존 레스트 컨트롤러의 경로와 겹치지 않으려면 yml 설정 정보를 알려주면 된다.
+
+spring:
+  data:
+    rest:
+      base-path: /api
+
+localhost:8080/api/ingredints
+
+API 호출시 복수형이 아닌 사용자 이름을 지정하고 싶다면 스프링 데이터 반환 타입 클래스에
+@RestResource(rel="tacos", path="tacos") 애노테이션을 사용하면 된다. // Taco 참고
+             // 관계 이름, 경로
+
+SpringDataRest 로 타코를 호출하면  타코정보와 스프링 데이터에 저장된 타코의 성분 컬렉션값,
+페이징 정보 그리고 각각의 하이퍼링크를 포함한 정보를 받을 수 있다! (매우 엄청난 기능)
+
+```
+```
+* 페이징과 정렬
+
+localhost:8080/api/tacos?sort=createdAt,desc&page=0&size=12
+페이징 정렬 사이즈 지정도 가능! 
+
+HATEOAS 는 처음, 마지막, 다음, 이전 페이지의 링크도 제공한다! 
+
+```
+```
+* 커스텀 엔드포인트 추가 
+
+앞에서 사용한 페이징과 정렬은 하드코딩 되어 있음 API 스펙이 변경되면 호출되지 않는 문제가 발생한다!
+localhost:8080/api/tacos?sort=createdAt,desc&page=0&size=12
+
+RecentTacosController 는 페이징과 정렬 기능을 가진 최근 타코를 호출하는 API 정의다. 
+어셈블러와 리소스를 사용해서 엔티티를 외부로 노출하지 않고 캡슐화 할 수 있다.
+
+커스텀 엔드포인트를 추가하면 스프링 데이터 레스트와 함께 사용할 수 있다.
+
+기존에 사용했던 @RestController 가 아닌 @RepositoryRestController 애노테이션은 spring base path 로 
+설정한 기본 경로를 가지게 된다. 
+
+그리고 호출할 @GetMapping(path = "/tacos/recent", produces="application/hal+json") API 주소를 설정하면 된다. 
+
+@RepositoryRestController 애노테이션을 사용할 때 주의할 점은
+Response 바디에 값을 직접 넣어줘야 하며 // 하이퍼링크를 따로 커스텀 엔드포인트에 추가해줘야 한다
+
+RecentTacosController 참고
+```
+```
+* 커스텀 하이퍼링크를 스프링 데이터 엔드포인트에 추가하기
+
+SpringDataRest 의 엔드 포인트에 커스텀 엔드포인트의 하이퍼링크를 추가할 수 있다.
+원하는 엔드포인트 링크를 추가해서 추가 정보를 제공하는 개념
+
+RepresentationModelProcessor<EntityModel<Taco>> 을 구현하고 하이퍼링크를 
+스프링 데이터 엔트포인트가 호출할 리소스에 추가해주면 된다. RecentTacosProcessor 참고 
+```
+
