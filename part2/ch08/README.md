@@ -301,5 +301,5 @@ Spring:
 
 kafka.OrderListner 참고 
 
-메시지의 추가 메타 데이터가 필요한 경우 ConsumerRecord, Message 객체를 인자로 받을 수 있다.
+메시지의 추가 메타 데이터가 필요한 경우 ConsumerRecord, Message 객체를 인자로 받을 수 있다. 
 ```
