@@ -13,8 +13,11 @@ public class RecentTacosProcessor implements RepresentationModelProcessor<Entity
     @Override
     public EntityModel<Taco> process(EntityModel<Taco> taco) {
 
-        Link link = linkTo(methodOn(RecentTacosController.class).recentTacos()).withRel("recents");
-        taco.add(link);
+        //Link link = linkTo(methodOn(RecentTacosController.class).recentTacos()).withRel("recents");
+        //taco.add(link); <- 이것 아님
+        
+        taco.add(Link.of("/api/tacos/recent").withRel("recents"));
+   
 
         return taco;
     }
