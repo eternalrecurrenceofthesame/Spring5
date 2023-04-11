@@ -129,22 +129,177 @@ jms.send("tacocloud.order.queue",
 ## JMS 메시지 수신하기
 ```
 풀 모델: 메시지를 요청하고 도착할때 까지 기다림
-푸시 모델: 메시지가 수신 가능하게 되면 우리 코드로 자동 전달
+푸시 모델: 메시지가 수신 가능하게 되면 우리 코드로 자동 전달 (리스너)
 
 JmsTemplate 은 모든 메서드에서 풀 모델을 사용한다.
 ```
 ### JmsTemplate 을 사용해서 메시지 수신하기
 ```
-JmsTemplate 은 브로커로부터 메시지를 가져오는 여러 개의 수신 메서드를 제공한다.
-이 수신 메서드 들은 send, convertAndSend 메서드의 타입과 대응된다. 
+* tacocloud.order.queue 도착지로부터 Order 객체 가져오는 코드 (풀모델)
 
-Message receive()
-Object ReveiveAndConvert() 
+receive 를 사용하면 메시지 컨텐츠 외에 메타 정보도 가져올 수 있다. 메시지 페이로드(순수 데이터)만 필요하다면 
+receiveAndConvert 를 사용하면 된다.
+
+JmsOrderReceiver 참고
+
+리스너를 사용하지 않은 풀 모델은 리시버를 호출하고 메시지가 수신될때 까지 기다린다! 
 ```
 ```
-* tacocloud.order.queue 도착지로부터 Order 객체 가져오는 코드
+* 메시지 리스너 선언하기 
 
+receive(), receiveAndConverter() 를 호출해야 하는 풀 모델과 달리, 메시지 리스너는 메시지가 
+도착할 때까지 대기하는 수동적 컴포넌트
 
+@JmsListner 을 사용하면 애플리케이션에서 직접 리시브를 호출하지 않는대신 스프링 프레임워크가 
+특정 메시지가 도착하는 것을 기다리고 도착하면 해당 메시지에 적재된 객체를 인자로 전달해서
 
+receiverOrdser() 메서드를 호출해준다.
+
+OrderListner 참고
+
+메시지 리스너 자동화 기능이 좋아 보일 수 있지만 무분별하게 주문을 받게되면 병목현상이 생길 수 있다.
+과부하가 생기지 않도록 사용자 인터페이스에서 도착하는 주문을 버퍼링 해야한다. 275p
+
+필요에 따라 사용하면 됨 메시지를 즉각즉각 빠르게 처리해야하면 리스너를 쓰면 되고 
+메시지 사용자에 맞춰서 메시지가 사용되어야 하면 풀 모델을 사용
+
+JMS 는 자바 애플리케이션에서만 사용할 수 있음 브로커 메시징 시스템을 사용하면 다른 애플리케이션에서도 
+사용할 수 있다!
 ```
 
+## RabbitMQ 와 AMQP 사용하기
+```
+메시지 전송자는 래빗 브로커에 메시지를 전송한다 메시지는 주소로 지정된 거래소(exchange)로 들어간다.
+거래소는 하나 이상의 큐에 메시지를 전달할 책임이 있다. 
+메시징 처리는 거래소 타입, 거래소와 큐 간의 바인딩, 메시지의 라우팅 키 값을 바탕으로 처리된다.
+
+거래소와 큐 간의 바인딩은 라우팅 키 값으로 이루어진다. 거래소와의 바인딩에 따라서 큐로 전달 ?? 
+https://jin2rang.tistory.com/entry/RabbitMQ%EB%9E%80
+```
+```
+* 거래소의 종류 277 참고
+
+스프링 애플리케이션에서 메시지를 전송하고 수신하는 방법은 거래소 타입과 무관하다.
+
+중요한 것은 메시지는 라우팅 키를 가지고 거래소로 전달되고 메시지는 바인딩 정의를 기반으로
+거래소로부터 큐로 전달된다는 것이다.
+```
+
+### RabbitMQ 브로커 속성
+```
+spring:
+  rabbitmq:
+    host: rabbit.tacocloud.com // 호스트(기본값은 localhost)
+    port: 5673 // 포트(기본 값 5672)
+    username: user // 브로커를 사용하기 위한 사용자 이름(선택)
+    password: 1234 // 브로커를 사용하기 위한 사용자 암호(선택)
+```
+
+### RabbitTemplate 을 사용해서 메시지 전송하기 
+```
+* RabbitOrderMessagingService 참고
+
+RabbitTemplate 을 이용하면 간편하게 메시지를 전송할 수 있다.
+
+@Override
+    public void sendOrder(Order order) {
+        MessageConverter converter = rabbit.getMessageConverter();
+        MessageProperties props = new MessageProperties(); //spring
+        
+        props.setHeader("X_ORDER_SOURCE", "WEB"); // 메시지 속성 설정
+
+        Message message = converter.toMessage(order, props);
+        rabbit.send("tacocloud.order","routing_key", message);
+    }
+
+spring: 
+  template:
+    exchange: tacocloud.orders
+    routing-key: kitchens.central
+    
+거래소 이름과 라우팅 키값을 지정해줄 수도 있다. 거래소를 지정하지 않을 경우 기본값이 됨.   
+
+rabbit.convertAndSend(order); // 간편한 컨버팅과 전송 방법!
+```
+```
+* Rabbit 메시지 변환기 구성하기
+
+기본적으로 메시지 변환은 SimpleMessageConvert 를 사용한다 앞서 설명했지만 Serializable 을 구현해야함
+JSON 기반 메시지를 변환하려면 잭슨 컨버터를 구현하면 됨 MessageConfig 참고
+```
+```
+* Rabbit 메시지 속성 설정하기 RabbitOrderMessagingService 참고
+
+ rabbit.convertAndSend(order, new MessagePostProcessor() {
+            @Override
+            public Message postProcessMessage(Message message) throws AmqpException {
+                MessageProperties props = message.getMessageProperties();
+                props.setHeader("X_ORDER_SOURCE", "WEB");
+                return message;
+            }
+        });
+```
+
+### RabbitMQ 로부터 메시지 수신하기
+```
+* RabbitTemplate 을 사용해서 메시지 수신하기
+
+메시지를 소비하는 컨슈머는 큐만 알고 있으면 된다. 거래소,라우팅키는 메시지를 큐로 전달할 때 사용되고 
+컨슈머는 사용하지 않는다.
+
+  public Order receiveOrder(){
+        Message message = rabbit.receive("tacocloud.order.queue", 30000); // 호출즉시 반환하지 않고 30 초 후 반환
+
+     return message != null ? (Order) converter.fromMessage(message) : null;
+    }
+    
+spring:
+  rabbitmq:
+    template:
+      receive-timeout: 30000 
+      
+RabbitOrderReceiver 참고 
+```
+```
+* 리스너를 사용해서 RabbitMQ 메시지 처리
+rabitmq.OrderListner 참고 JMS 에서 사용한 리스너와 다를 게 없다(사용방식)
+```
+## 카프카 사용하기
+
+### 카프카 사용을 위한 스프링 설정
+
+```
+spring:
+  kafka:
+    bootstrap-servers: // s 주의
+      -kafka.tacocloud.com:9092
+      -kafka.tacocloud.com:9093
+      -kafka.tacocloud.com:9094
+      
+카프카 클러스터로의 초기 연결에 사용되는 하나 이상의 카프카 서버 설정
+
+앞서 설명했지만 로컬에서 사용할 때는 기본 설정을 사용하면 된다.
+카프카 브로커 기본 포트는 9092
+```
+
+### KafkaTemplate 사용하기
+
+```
+* KafkaTemplate 참고
+
+Spring:
+  kafka:
+    template:
+      default-topic: tacocloud.orders.topic
+      
+      카프카 기본 토픽 값 설정 
+```
+```
+* 카프카 리스너 작성
+
+카프카는 수신하는 메서드를 제공하지 않기 때문에 리스너로 수신해야한다.
+
+kafka.OrderListner 참고 
+
+메시지의 추가 메타 데이터가 필요한 경우 ConsumerRecord, Message 객체를 인자로 받을 수 있다.
+```
