@@ -112,6 +112,7 @@ DSL 사용시 코드 가동성을 위한 들여쓰기를 한다
 * 컴포넌트
 
 채널: 메시지 전달
+
 필터: 조건에 맞는 메시지가 플로우를 통과
 변환기: 메시지 값을 변경, 페이로드의 타입을 다른 타입으로 변환
 
@@ -120,6 +121,7 @@ DSL 사용시 코드 가동성을 위한 들여쓰기를 한다
 집적기: 별개의 채널로부터 전달되는 다수의 메시지를 하나의 메시지로 결합
 
 서비스 액티베이터: 자바 메서드에 메시지를 넘겨준 후 메서드의 반환 값을 출력 채널로 전송
+
 채널 어댑터: 외부 시스템에 채널을 연결한다. 외부로부터 입력받거나 쓸 수 있다.
 게이트웨이: 인터페이스를 통해 통합 플로우로 데이터를 전달한다.
 ```
@@ -223,7 +225,7 @@ return IntegrationFlows.
 * RouterConfig 참고 
 
 정숫값을 전달해서 짝수와 홀수를 나눠서 플로우 하는 로직 
-``
+```
 
 ### 분배기
 
@@ -261,15 +263,109 @@ OrderSplitterDSLConfig 참고
 
 ### 서비스 액티베이터
 
+서비스 액티베이터는 메시지를 수신하고 핸들러 인터페이스를 구현한(빈) 에 전달하는 역할 
 
+한마디로 핸들러 호출전에 거치는 단계임.
+
+서비스 액티베이터 기능을 수행하기 위해 커스텀 클래스를 제공해야 할 때가 있다.
+
+```
+* 서비스 액티베이터 예시
+
+@Bean
+    @ServiceActivator(inputChannel = "someChannel")
+    public MessageHandler sysoutHandler(){
+        return message -> {
+            System.out.println("Message payload: " + message.getPayload());
+        };
+    }
+
+핸들러를 직접 람다식으로 만든 서비스 액티베이터 메시지를 람다식으로 처리할 수 있다.
+
+   @Bean
+    @ServiceActivator(inputChannel = "orderChannel",
+                      outputChannel = "completeChannel")
+    public GenericHandler<Order> orderHandler(OrderRepository orderRepository){
+        return (payload, headers) ->{
+            return orderRepository.save(payload);
+        };
+    } 
+
+메시지를 가로채서? 데이터를 저장하고 저장된 객체를 출력 채널로 전달할 수 있다. 
+
+  @Bean
+    public IntegrationFlow fileWriterFlow() {
+        return IntegrationFlows
+                .from(MessageChannels.direct("textInChannel")) // 인바운드
+                .handle(msg ->{System.out.println("Message payload: " + msg.getPayload());}
+                        ).get();
+    }
+    
+      @Bean
+    public IntegrationFlow fileWriterFlow() {
+        return IntegrationFlows
+                .from(MessageChannels.direct("textInChannel")) // 인바운드
+                .<Order>handle((payload, headers)->{return orderRepository.save(payload);}
+                        ).get();
+    }
+    
+DSL 을 이용해서 콘솔, 
+```
+
+### 게이트웨이
+
+게이트웨이는 통합 파이프라인의 시작점임 게이트웨이는 단방향 또는 양방향으로만들 수 있다.
+```
+FileWriterGateway 단방향 게이트웨이 
+UpperCaseGateway 양방향 게이트웨이 참고.
+```
+
+### 채널 어댑터
+
+채널 어댑터는 통합 플로우의 입구와 출구, 인바운드 채널 어댑터를 통해 통합 플로우로 들어오고
+
+아웃바운드 채널 어댑터를 통해 통합 플로우에서 나가게 된다.
+
+아웃바운드 어댑터는 통합 플로우의 끝단이고 최종 메시지를 애플리케이션이나 다른 시스템으로 넘겨준다.
 
 * 간단한 정리
+```
+포괄적으로 정리하면 게이트웨이와 통합 파이프라인으로 나눌 수 있다 ?? (책의 설명으로 유추함..)
+통합 파이프라인은 파이프라인(채널)과 통합 플로우(컴포넌트)로 나뉜다
 
-게이트 -> 인바운드 채널 어댑터 -> 통합 플로우 -> 인바운드 채널 어댑터 
-
-통합 플로우는 컴포넌트들로 구성된다. 그리고 채널 컴포넌트를 통해서 통합 플로우 간 이동을 할 수 있다.
+채널에서 사용하는 채널 어댑터는 통합 플로우의 입구와 출구가 되고 채널을 통해서 통합 플로우에
+접근할 수 있다.
 
 ```
-통합 파이프라인 (전체 과정을 뜻하는듯?)
-게이트웨이 -> 채널(파이프라인) -> 필터 -> 라우터 -> ...  -> 다른 채널
+
 ```
+* 인바운드 어댑터 예시 
+
+ @Bean
+    @InboundChannelAdapter(
+            poller=@Poller(fixedRate="1000"), channel="numberChannel")
+    public MessageSource<Integer> numberSource(AtomicInteger source){
+        return () -> {
+            return new GenericMessage<>(source.getAndIncrement());
+        };
+    }
+
+매초 마다 한번씩 숫자를 전달하는 어댑터 
+
+
+DSL 에서는 from 절이 인바운드 어댑터 역할을 한다.
+```
+```
+* 통합 파일 엔드포인트 모듈 어댑터
+
+
+
+```
+
+### 엔드포인트 모듈
+
+스프링 통합은 커스텀 어댑터를 생성할 수 있게 해준다. 
+
+## 이메일 통합 플로우 생성하기 
+
+
