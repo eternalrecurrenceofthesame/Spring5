@@ -8,18 +8,18 @@ ex) 애플리케이션에서 이메일 수신 발신, 외부 API 와 상호작�
 ```
 * 의존성 추가
     <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-integration</artifactId>
-		</dependency> // 스프링 부트 스타터 인티그레이션 통합 프로우 개발시 필수 항목
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-integration</artifactId>
+    </dependency> // 스프링 부트 스타터 인티그레이션 통합 프로우 개발시 필수 항목
 
-		<dependency>
-			<groupId>org.springframework.integration</groupId>
-			<artifactId>spring-integration-file</artifactId>
-		</dependency> // 통합 플로우 파일을 읽거나 통합 플로우로부터
+    <dependency>
+	<groupId>org.springframework.integration</groupId>
+	<artifactId>spring-integration-file</artifactId>
+    </dependency> // 통합 플로우 파일을 읽거나 통합 플로우로부터
                      파일 시스템으로 데이터를 쓸 수 있는 기능 제공
 ```
 ```
-* 애플리케이션에서 통합 프로우로 데이터를 전송하는 게이트웨이 생성
+* 애플리케이션에서 통합 플로우로 데이터를 전송하는 게이트웨이 생성
 
 FileWriterGateway 참고
 
@@ -29,7 +29,7 @@ FileWriterGateway 참고
 다른 코드에서 파일에 데이터를 써야할 때 이 인터페이스를 사용한다.
 
 defaultRequestChannel 속성은 해당 인터페이스의 메서드 호출로 생성된 메시지가 이 속성에
-지정딘 메시지 채널로 전송된다는 것을 나타낸다.
+지정된 메시지 채널로 전송된다는 것을 나타낸다.
 
 @Header(FileHeaders.FILENAME) String filename,
 페이로드가 아닌메시지 헤더 Stirng 값
@@ -42,12 +42,6 @@ String data
 
 XML, 자바, DSL / 세 가지를 사용해서 구성할 수 있다.
 ```
-```
-* 파일-쓰기 통합 플로우 메커니즘
-
-파을-쓰기 게이트웨이 -> 텍스트 입력 채널 -> 대문자 변환기 -> 파일-쓰기 채널 -> 파일 아웃바운드 채널 어댑터
-
-```
 
 ### xml 을 사용한 통합 플로우 구성
 ```
@@ -59,9 +53,223 @@ XML, 자바, DSL / 세 가지를 사용해서 구성할 수 있다.
 대부분 xml 대신 자바 구성을 사용한다. 자바로 플로우를 정의하자
 
 ```
+* FileWriterIntegrationConfig 참고
 
+파일 변환기, 파일-쓰기 메시지 핸들러를 빈으로 등록한다. 
+
+게이트웨이를 통해서 데이터(메타데이터 + 페이로드)가 textInChannel(인바운드 채널) 로 전송되고 
+인바운드 채널에서 파일 변환기 toUpperCase 를 호출해서 대문자로 변환한다.
+
+변환된 결과는 변환기가 지정한 아웃바운드 fileWriterChannel 파일-쓰기 채널로 전달된다 
+파일-쓰기 채널은 변환기와 아웃바운드 채널 어댑터를 연결하는 전달자의 역할을 수행한다.
+
+그리고 어댑터가 핸들러를 호출! 
+
+
+Tip
+핸들러에서 응답 채널을 사용하지 않으면 플로우가 정상적으로 작동하더라도 응답 채널이 구성되지 않았다는
+로그 메시지가 나타난다.
+
+Tip
+채널을 별도로 선언하지 않으면 채널은 자동으로 생성된다. 각 채널의 구성을 제어하고 싶다면 별도의 빈을 만들면 됨
+
+@Bean
+public MessageChannel textInChannel() or fileWriterChannel(){
+	return new DirectChannel();
+}
 ```
 
+### 스프링 통합의 DSL 구성 사용하기
+
+```
+* FileWriterIntegrationDSLConfig 참고 
+
+자바 구성에비해 람다식을 사용하여 코드가 더 간결해진다 ! 
+
+      return IntegrationFlows
+                .from(MessageChannels.direct("textInChannel")) // 인바운드
+                .<String, String>transform(t -> t.toUpperCase()) // 변환기 선언
+                .handle(Files.outboundAdapter(new File("/tmp/sia5/files"))
+                        .fileExistsMode(FileExistsMode.APPEND)
+                        .appendNewLine(true)).get();
+
+따로 인바운드에서 호출하는 아웃바운드 채널을 만들지 않고 바로 핸들러를 호출할 수 있다.
+여기서도 마찬가지로 따로 채널 빈을 선언할 필요는 없다.
+
+
+아웃바운드 채널을 별도로 구성할 필요가 있다면 추가해주면 된다.
+.<String, String>transform(t -> t.toUpperCase()) // 변환기 선언
+.channel(MessageChannels.direct("fileWriterChannel"))
+
+DSL 사용시 코드 가동성을 위한 들여쓰기를 한다
+통합 플로우 코드가 복잡해지면 플로우의 일부분을 별도 메서드나 서브 플로우로 추출하자! 
+```
+
+## 스프링 통합의 컴포넌트 살펴보기 
+
+통합 플로우는 하나 이상의 컴포넌트로 구성된다
+```
+* 컴포넌트
+
+채널: 메시지 전달
+필터: 조건에 맞는 메시지가 플로우를 통과
+변환기: 메시지 값을 변경, 페이로드의 타입을 다른 타입으로 변환
+
+라우터: 여러 채널 중 하나의 채널로 데이터를 전달해주는 역할 주로 메시지 헤더 기반
+분배기: 메시지를 두 개 이상으로 분리해서 각각의 채널로 전송
+집적기: 별개의 채널로부터 전달되는 다수의 메시지를 하나의 메시지로 결합
+
+서비스 액티베이터: 자바 메서드에 메시지를 넘겨준 후 메서드의 반환 값을 출력 채널로 전송
+채널 어댑터: 외부 시스템에 채널을 연결한다. 외부로부터 입력받거나 쓸 수 있다.
+게이트웨이: 인터페이스를 통해 통합 플로우로 데이터를 전달한다.
+```
+
+### 메시지 채널
+```
+메시지 채널은 스프링 통합 플로우의 컴포넌트 간 데이터를 전달하는 통로
+메시지 채널은 통합 파이프라인을 통해서 메시지가 이동하는 수단! (채널을 통해서 통합 플로우로 이동)
+```
+```
+* 채널 구현체
+
+PublishSubscribeChannel: 하나 이상의 컨슈머로 전달 컨슈머가 여럿일 때 모든 컨슈머가 수신 
+PriorityChannel: 큐와 유사하지만 FIFO 대신 priority 헤더 기반으로 컨슈머가 메시지를 가져간다.
+RendezvousChannel: 큐와 유사하지만 컨슈머가 메시지를 수신할 때까지 전송자가 채널을 차단한다.
+DirectChannel: 기본 사용 채널, 전송자와 동일한 스레드로 실행되는 컨슈머를 호출하여 단일 
+               컨슈머에게 메시지를 전송한다. (트랜잭션 지원)
+ExecutorChannel: TakeExecutor 를 통해서 메시지가 전송된다(전송자와 다른 스레드에서 처리)
+		 트랜잭션 지원 x
+FluxMessageChannel: 리액티브기반 채널
+```
+
+```
+* QueueChannel
+
+컨슈머가 메시지를 가져갈 때까지 큐에 메시지가 저장된다. (FIFO 방식) 컨슈머가 여럿이면 하나의 컨슈머만 해당 메시지를 수신한다.
+큐 채널 사용시 컨슈머가 이 채널을 폴링(메시지를 지속적으로 확인함) 하도록 구성하는 것이 중요하다
+
+@Bean // 큐 채널 생성
+public MessageChannel orderChannel(){
+	return new QueueChannel();}
+
+@ServiceActivator(inputChannel="orderChannel"
+		  poller=@Poller(fixRate="1000")) 폴링 구성 				
+```
+
+### 필터
+```
+필터는 통합 파이프라인의 중간에 위치한다. 플로우의 전 단계부터 다음 단계로의 메시지 전달을 허용 또는 불허한다.
+```
+```
+* 필터 구현
+
+정숫값을 갖는 메시지를 numberChannel로 입력, 짝수인 경우에만 evenNumberChannel 채널로 전달
+
+자바 구성 사용
+
+@Filter(inputChannel="numberChannel",
+	outputChannel="evenNumberChannel")
+public boolean evenNumberFilter(Integer number){
+return number % 2== 0;} // true false 로 채널 변경 ! 
+
+DSL 사용
+
+@Bean
+public IntegrationFlow evenNumberFlow(AtomicInteger integerSource){
+	return IntegrationFlows
+	...
+	.<Integer>filter((P) -> P % 2 == 0) // 필터 메서드가 GenericSelector 를 인자로 받는다.
+	...
+	.get();
+}
+
+DSL 사용시 인바운드 다음에 필터를 적용
+```
+
+### 변환기
+
+앞서만든 변환기를 말하는 것!  
+
+```
+* 로마 문자로 바꾸기 
+
+@Bean
+@Transformer(inputChannel="numberChannel",
+	     outputChannel="romanNumberChannel")
+public GenericTransformer<Integer, String> romanNumTransformer(){
+return RomanNumbers::toRoman;}
+
+@Bean
+public IntegrationFlow transformerFlow(){
+return IntegrationFlows.
+...
+.transform(RomanNumbers::toRoman)
+...
+.get();}
+
+여기서 사용한 로만 넘버스는 따로 만든 클래스를 참조해서 사용한것! 스프링 타입 컨버터 참고.
+
+변환기를 별도의 자바 클래스로 만들 만큼 복잡하다면 스프링 통합 컨피그에 컨버터 클래스를 빈으로 만들고
+메서드의 인자로 사용해도 된다.
+
+변환기는 채널-> 필터,라우터 다음에 사용
+```
+
+### 라우터
+
+전달 조건을 기반으로 **플로우 내부**를 분기한다.(채널에서 분기되어 서로 다른 채널로 메시지 전달)
+
+```
+* RouterConfig 참고 
+
+정숫값을 전달해서 짝수와 홀수를 나눠서 플로우 하는 로직 
+``
+
+### 분배기
+
+splitter 패키지 참고 
+
+```
+* 분배기 사용 예시
+
+메시지 컬렉션을 나눠서 처리하고 싶을 때
+ex) 제품 리스트 컬렉션의 제품을 따로따로 처리하기
+
+연관된 정보를 함께 전달하는 하나의 메시지 페이로드를 두 개 이상의 서로 다른 타입으로 나눌 때 
+ex) 주문에서 메시지 대금 청구 정보, 주문 항목 리스트 나누기 
+```
+
+```
+* 분배기 실행 정리 splitter 참고 
+
+스플리터를 수행할 OrderSplitter 클래스를 만든다. 메시지를 나누기 위해 컬렉션으로 메시지를 나누는 클래스.
+@Spliter 애노테이션을 이용해서 스플리터를 설정으로 등록, 라우터를 만들고 스플리터에서 채널로 라우터 플로우와 연결한다.
+
+라우터의 PayloadTypeRouter 는 각 페이로드 타입을 기반으로 서로 다른 채널에 메시지를 전달한다.
+```
+```
+* LineItems 컬렉션을 별도로 처리하고 싶다면?
+
+하나의 메시지에서 스플릿된 컬렉션 메서드를 처리하고 싶다면 라우터에서 넘어온 메시지를 처리하는 
+플로우를 만들면 된다. 플로우에서 컬렉션 메서드를 별도로 사용하고 아웃바운드 어댑터로 넘겨준다! 
+```
+```
+* 스플리터 DSL 예시
+
+OrderSplitterDSLConfig 참고
+```
+
+### 서비스 액티베이터
 
 
 
+* 간단한 정리
+
+게이트 -> 인바운드 채널 어댑터 -> 통합 플로우 -> 인바운드 채널 어댑터 
+
+통합 플로우는 컴포넌트들로 구성된다. 그리고 채널 컴포넌트를 통해서 통합 플로우 간 이동을 할 수 있다.
+
+```
+통합 파이프라인 (전체 과정을 뜻하는듯?)
+게이트웨이 -> 채널(파이프라인) -> 필터 -> 라우터 -> ...  -> 다른 채널
+```
