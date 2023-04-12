@@ -63,8 +63,6 @@ XML, 자바, DSL / 세 가지를 사용해서 구성할 수 있다.
 변환된 결과는 변환기가 지정한 아웃바운드 fileWriterChannel 파일-쓰기 채널로 전달된다 
 파일-쓰기 채널은 변환기와 아웃바운드 채널 어댑터를 연결하는 전달자의 역할을 수행한다.
 
-그리고 어댑터가 핸들러를 호출! 
-
 
 Tip
 핸들러에서 응답 채널을 사용하지 않으면 플로우가 정상적으로 작동하더라도 응답 채널이 구성되지 않았다는
@@ -328,6 +326,8 @@ UpperCaseGateway 양방향 게이트웨이 참고.
 
 아웃바운드 어댑터는 통합 플로우의 끝단이고 최종 메시지를 애플리케이션이나 다른 시스템으로 넘겨준다.
 
+어댑터(핸들러) 포괄적인 개념인듯 
+
 * 간단한 정리
 ```
 포괄적으로 정리하면 게이트웨이와 통합 파이프라인으로 나눌 수 있다 ?? (책의 설명으로 유추함..)
@@ -337,7 +337,6 @@ UpperCaseGateway 양방향 게이트웨이 참고.
 접근할 수 있다.
 
 ```
-
 ```
 * 인바운드 어댑터 예시 
 
@@ -352,19 +351,34 @@ UpperCaseGateway 양방향 게이트웨이 참고.
 
 매초 마다 한번씩 숫자를 전달하는 어댑터 
 
-
-DSL 에서는 from 절이 인바운드 어댑터 역할을 한다.
+DSL 에서는 from 절이 인바운드 어댑터 역할을 한다.(이건 예제가 안 됨..)
 ```
 ```
-* 통합 파일 엔드포인트 모듈 어댑터
+* 통합 파일 엔드포인트 모듈 어댑터 예제
 
+@Bean
+    @InboundChannelAdapter(channel = "file-channel",
+    poller=@Poller(fixedDelay="1000"))
+    public MessageSource<File> fileReadingMessageSource(){
+        FileReadingMessageSource sourceReader = new FileReadingMessageSource();
+        sourceReader.setDirectory(new File("input_dir"));
+        sourceReader.setFilter(new SimplePatternFileListFilter("file_pattern"));
+        return sourceReader;
+    }
 
+@Bean
+    public IntegrationFlow fileReaderFlow(){
+        return IntegrationFlows.from(Files.inboundAdapter(new File("dir"))
+                .patternFilter("file_fattern")).get();
+    }
+DSL 사용
 
+Tip 어댑터 호출전에 사용되는 서비스 액터베이터를 아웃바운드 채널 어댑터 대용으로 자주 사용한다.
 ```
 
 ### 엔드포인트 모듈
 
-스프링 통합은 커스텀 어댑터를 생성할 수 있게 해준다. 
+스프링 통합은 커스텀 채널 어댑터(인바운드,아웃바운드)를 생성할 수 있는 모듈을 지원 해준다. 
 
 ## 이메일 통합 플로우 생성하기 
 
