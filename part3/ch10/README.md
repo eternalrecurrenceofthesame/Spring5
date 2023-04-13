@@ -132,10 +132,49 @@ first 는 deprecate 되었지만 예제 진행을 위해 사용.. public void fi
 
 Flux<String> skipFlux = Flux.just("one","two","skip a few", "ninety nine", "one hundred")
                 .skip(3);
-앞 세 개 스킵하고 99, 100 만 생성한다.
+앞 세 개를 스킵하고 99, 100 만 생성한다, take 를 사용하면 지정된 수 또는 지정된 시간 동안만 방출한다.
 
-
+skipAFewSeconds, take, take2 참고
 ```
+```
+* .filter 오퍼레이션을 이용한 조건식 만들기 
+
+filter 를 이용해서 조건식을 만들 수 있고, distint 를 사용해서 중복을 거를 수 있다.
+filter,distinct 참고
+```
+
+### 리액티브 데이터 매핑하기
+```
+* map 과 flatMap 사용하기
+
+map 을 사용해서 매핑하면 각 항목이 동기적으로 발행된다 map 테스트 참고 
+
+flatMap 은 각항목을 비동기적(병행 처리)으로 매핑을 수행한다.
+
+flatMap 을 사용하면 새로 발행한 값을 Mono 나 Flux 로 매핑한 후 결과값을 새로운 Flux 로 만들어준다.
+flatMap 과 subscribeOn 을 함께 사용하면 리액터 타입의 변환을 비동기적으로 수행할 수 있다.
+
+Flux<Player> playerFlux = Flux.just("Michael Jordan", "Scottie Pippen", "Steve Kerr")
+          .flatMap(n -> Mono.just(n)
+                 .map(p -> {
+                       String[] split = p.split("\\s");
+                       return new Player(split[0], split[1]);
+                    }).subscribeOn(Schedulers.parallel())
+                );
+
+위 로직에서 flatMap 으로 모노를 만들고 map 으로 매핑까지만 하면 일반 map 을 사용하는 것과 마찬가지로
+순서로(동기) 로 오퍼레이션을 수행한다.
+
+그러나 마지막에 subscribeOn() 을 호출하면 각 구독이 병렬 스레드로 수행되어야 한다는 것을 나타낸다.
+
+flatMap() 과 subscribeOn() 을 사용해서 비동기로 처리하면 다수의 병렬 스레드로 작업을 분할해서
+스트림의 처리량을 증가시킬 수 있다는 것이다.
+
+그러나 병렬로 작업이 수행되기 때문에 어떤 작업이 먼저 끝날지 보장되지 않는다.
+```
+
+
+
 
 
 
