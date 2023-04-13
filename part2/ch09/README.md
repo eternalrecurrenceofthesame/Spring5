@@ -386,8 +386,7 @@ Tip 어댑터 호출전에 사용되는 서비스 액터베이터를 아웃바�
 API 서비스를 호출해보기
 ```
 ```
-* EmailProperties 설정
-
+* tacocloudemail 참고
 
 ```
 
