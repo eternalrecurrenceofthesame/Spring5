@@ -1,0 +1,13 @@
+spring:
+  main:
+    web-application-type: none
+
+tacocloud:
+  email:
+    host: imap.tacocloud.com
+    mailbox: INBOX
+    username: taco-in-flow
+    password: 12345
+    poll-rate: 10000
+  api:
+    url: http://localhost:8080/orders/fromEmail
