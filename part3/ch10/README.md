@@ -89,6 +89,8 @@ createAFlux_range, createAFlux_interval 참고
 
 있다. Flux 나 Mono 를 결합하거나 분리해보기
 
+* FluxMergingTests 참고
+
 ```
 * 리액티브 타입 결합 
 
@@ -125,6 +127,8 @@ first 는 deprecate 되었지만 예제 진행을 위해 사용.. public void fi
 ### 리액티브 스트림의 변환과 필터링
 
 스트림 동안 다른 값으로 변경하거나 걸러내기
+
+* FluxTransformingTests 참고
 
 ```
 * 리액티브 타입으로부터 데이터 필터링하기 
@@ -184,9 +188,8 @@ subscribeOn 은 Schedulers 의 static 메서드 중 하나를 사용한다
 리액티브 스트림의 데이터 버퍼링이란? 
 Flux 가 방출한 데이터 스트림을 작은 덩어리로 분할해서 사용하는 것을 말한다.
 ```
-```
 * FluxBufferingTests 참고
-
+```
 Flux<String> fruitFlux = Flux.just("apple", "orange", "banana","kiwi","strawberry");
 Flux<List<String>> bufferedFlux = fruitFlux.buffer(3);
 
