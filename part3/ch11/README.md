@@ -111,11 +111,69 @@ WebTestClient testClient = WebTestClient.bindToController(new DesignTacoControll
                 .build(); // TestClient 생성
 
 testClient.get().uri("/design/recent")
-                .exchange() // 최근 타코 요청
+                .exchange() // 최근 타코 요청 (API 요청을 제출한다)
                 .expectStatus().isOk() // 기대한 응답인지 검사
                 .expectBody()
                 .jsonPath("$").isArray() // $ 를 사용하면 루트 검사를할 수 있다
                 .jsonPath("$").isNotEmpty()
-                
+                .jsonPath("$[0].id").isEqualTo(tacos[0].getId().toString()) //Json 패스를 이용한 값 꺼내기
+                .jsonPath("$[0].name").isEqualTo("Taco 1") 
+```
+```
+* A Taco 저장 테스트하기
+
+shouldSaveATaco 메서드 참고
+
+ testClient.post().uri("/design")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(tacoMono, Taco.class)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(Taco.class) // 페이로드 값과 저장된 타코 객체가 같은 타입인지 체크
+                .isEqualTo(taco);
+
+논블로킹 /design 메서드는 저장이 안 됨.. 블로킹 메서드로 대체해서 테스트 했음. 
+DesignTacoController 참고
+```
+```
+* 실행중인 서버로 테스트하기(통합 테스트)
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class DesignTacoControllerTest {
+    
+    @Autowired
+    private WebTestClient testClient;
+
+Netty 서버로 통합 테스트하기 ! 사실 말이 서버를 띄우고 하는 통합테스트지
+앞에서 한 Mock 테스트랑 같다.
+
+testClient.get().uri("/design/recent")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[?(@.id == 'TACO1')].name")
+                .isEqualTo("Carnivore")
+                .jsonPath("$[?(@.id == 'TAC02')].name")
+                .isEqualTo("Bovine Bounty");
+```
+```
+* 간단히 사용한  json-path 정리
+
+$: jsonPath 의 시작점이자 root 가 된다. 가장 바깥으로 생각하자.
+[?(<expression>)] : 필터를 표현할 때 사용한다.	
+@: 현재 노드에서 필터를 적용할 때 사용  
+        
+(https://github.com/json-path/JsonPath) 참고! 
 ```
 
+
+### REST API 를 리액티브하게 사용하기
+```       
+RestTemplate 은 리액티브를 지원하지 않는다 (비동기 요청)
+WebClient 의 인스턴스를 생성하거나 빈으로 주입받아서 RestTemplate 대신 사용하면 된다
+```
+        
+
+     
+        
