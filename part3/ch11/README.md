@@ -96,7 +96,7 @@ public RouterFunction<?> routerFunction() {
       
 Get 으로 최근 타코를 호출하는 라우터와 Post 로 타코를 저장하는 라우터
 호출 로직들은 RouterFunctionConfig 참고 
-``
+```
 
 ### 리액티브 컨트롤러 테스트하기
 ```
@@ -161,19 +161,31 @@ testClient.get().uri("/design/recent")
 * 간단히 사용한  json-path 정리
 
 $: jsonPath 의 시작점이자 root 가 된다. 가장 바깥으로 생각하자.
-[?(<expression>)] : 필터를 표현할 때 사용한다.	
+ [?(<expression>)] : 필터를 표현할 때 사용한다.	
 @: 현재 노드에서 필터를 적용할 때 사용  
         
 (https://github.com/json-path/JsonPath) 참고! 
 ```
 
+### REST API 서비스를 리액티브하게 만들기
 
-### REST API 를 리액티브하게 사용하기
-```       
+```
 RestTemplate 은 리액티브를 지원하지 않는다 (비동기 요청)
 WebClient 의 인스턴스를 생성하거나 빈으로 주입받아서 RestTemplate 대신 사용하면 된다
 ```
-        
+```
+* 리소스 얻기(GET)
 
-     
+클라이언트가 GET 로 성분을 얻고 싶을 때 
+
+Mono<Ingredient> ingredient = WebClient.create()
+                .get()
+                .uri("http://localhost:8080/ingredient/{id}", ingredientId)
+                .retrieve()
+                .bodyToMono(Ingredient.class);
+
+        ingredient.subscribe(i -> {...});
         
+API 를 호출하고 방출된 스트림을 받는다. 그리고 구독해서 데이터를 넘겨준다! 
+참고로 구독하면 데이터에서 값을 직접 꺼낼 수 있다. 
+```
