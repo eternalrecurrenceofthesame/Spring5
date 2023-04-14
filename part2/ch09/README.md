@@ -261,7 +261,7 @@ OrderSplitterDSLConfig 참고
 
 ### 서비스 액티베이터
 
-서비스 액티베이터는 메시지를 수신하고 핸들러 인터페이스를 구현한(빈) 에 전달하는 역할 
+서비스 액티베이터는 메시지를 수신하고 핸들러 인터페이스를 구현한 클래스(빈) 에 전달하는 역할 
 
 한마디로 핸들러 호출전에 거치는 단계임.
 
@@ -278,7 +278,7 @@ OrderSplitterDSLConfig 참고
         };
     }
 
-핸들러를 직접 람다식으로 만든 서비스 액티베이터 메시지를 람다식으로 처리할 수 있다.
+핸들러를 호출하지 않고 액티베이터에서 콘솔에 값을 찍는 로직 
 
    @Bean
     @ServiceActivator(inputChannel = "orderChannel",
@@ -289,7 +289,7 @@ OrderSplitterDSLConfig 참고
         };
     } 
 
-메시지를 가로채서? 데이터를 저장하고 저장된 객체를 출력 채널로 전달할 수 있다. 
+메시지를 가로채서? 데이터를 저장하고 저장된 객체를 출력 채널로 전달할 수도 있다. 
 
   @Bean
     public IntegrationFlow fileWriterFlow() {
