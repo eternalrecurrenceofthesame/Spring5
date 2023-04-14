@@ -65,7 +65,57 @@ Flux 를 Mono<Taco> 값으로 반환하도록 하면 Mono 타입으로 값을 �
 Flux: 0, 1 또는 다수의 데이터를 갖는 파이프라인을 가진다
 Mono: 하나의 데이터 항목만 갖는 리액티브 타입
 ```
-### 함수형 요청 핸들러 정의하기 
+### 함수형으로 API 요청 핸들러 만들어보기!
 
+```
+* 스프링의 함수형 플로그래밍 API 작성에 사용되는 타입들
 
+RequestPredicate: 처리될 요청의 종류를 선언한다.
+RouterFunction: 라우팅된 요청이 어떻게 핸들러에 전달되어야 하는지 선언한다.
+ServerRequest: HTTP 요청을 나타내며, 헤더와 몸체 정보를 사용할 수 있다.
+ServerResponse: HTTP 응답을 나타내며, 헤더와 몸체 정보를 포함한다.
+```
+```
+* 함수형 API 예시 demo.RouterFunctionConfig 참고 
+
+ @Bean
+public RouterFunction<?> helloRouterFunction(){
+        return RouterFunctions.route(RequestPredicates.GET("/hello"),
+                ServerRequest -> ServerResponse.ok().body(just("Hello World!"),String.class))
+                .andRoute(RequestPredicates.GET("/bye"),
+                ServerRequest -> ServerResponse.ok().body(just("See Ya!"), String.class));
+    }
+
+다른 종류의 요청도 처리해야하는 경우 .andRoute 로 간단하게 라우팅할 수 있다.
+
+ @Bean
+public RouterFunction<?> routerFunction() {
+     return RouterFunctions.route(RequestPredicates.GET("/design/taco"), this::recents)
+                .andRoute(RequestPredicates.POST("/design"), this::postTaco);
+    }
+      
+Get 으로 최근 타코를 호출하는 라우터와 Post 로 타코를 저장하는 라우터
+호출 로직들은 RouterFunctionConfig 참고 
+``
+
+### 리액티브 컨트롤러 테스트하기
+```
+스프링 5 가 제공하는 WebTestClient 를 사용하면 WebFlux 를 사용하는 리액티브 컨트롤러의
+테스트를 쉽게 작성할 수 있다.
+```
+```
+* DesignTacoControllerTest 참고
+
+shouldReturnRecentTacos
+WebTestClient testClient = WebTestClient.bindToController(new DesignTacoController(tacoRepository))
+                .build(); // TestClient 생성
+
+testClient.get().uri("/design/recent")
+                .exchange() // 최근 타코 요청
+                .expectStatus().isOk() // 기대한 응답인지 검사
+                .expectBody()
+                .jsonPath("$").isArray() // $ 를 사용하면 루트 검사를할 수 있다
+                .jsonPath("$").isNotEmpty()
+                
+```
 
