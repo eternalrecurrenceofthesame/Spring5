@@ -26,11 +26,10 @@ Mono.just("Craig").map(n -> n.toUpperCase()).map(cn -> "Hello, " + cn + "!")
 스트림(파이프라인?) 에 세 개의 모노가 만들어진다. (just, map, map)
 처음 모노 데이터가 생성되고 방출, map 에서 데이터 변경 후 모노를 생성 방출되는 메커니즘이다
 
-.subscrie 으로 구독하고 구독자가 생성되면 데이터를 넘겨준다.
-
 각 오퍼레이션 단계는 같은 스레드로 실행되거나 다른 스레드로 실행될 수 있다.
-리액티브는 병렬적으로 작업이 진행되므로 Mono 를 호출하고 스레드는 다른 작업을 수행할 수 있다.
+리액티브는 병렬적으로 작업이 진행되므로 오퍼레이션을 호출하고 스레드는 다른 작업을 수행할 수 있다.
 
+.subscrie 으로 구독하고 구독자가 생성되면 데이터를 넘겨준다.
 
 Mono: 하나의 데이터 항목만 갖는 파이프라인 // Flux 0,1 또는 다수의 데이터를 갖는 파이프라인 346p
 ```
@@ -145,9 +144,9 @@ filter,distinct 참고
 
 ### 리액티브 데이터 매핑하기
 ```
-* map 과 flatMap 사용하기
+* map 과 flatMap 사용하기 FluxTransformingTests 참고
 
-map 을 사용해서 매핑하면 각 항목이 동기적으로 발행된다 map 테스트 참고 
+map 을 사용해서 매핑하면 각 항목이 동기적으로 발행된다.
 
 flatMap 은 각항목을 비동기적(병행 처리)으로 매핑을 수행한다.
 
@@ -168,23 +167,77 @@ Flux<Player> playerFlux = Flux.just("Michael Jordan", "Scottie Pippen", "Steve K
 그러나 마지막에 subscribeOn() 을 호출하면 각 구독이 병렬 스레드로 수행되어야 한다는 것을 나타낸다.
 
 flatMap() 과 subscribeOn() 을 사용해서 비동기로 처리하면 다수의 병렬 스레드로 작업을 분할해서
-스트림의 처리량을 증가시킬 수 있다는 것이다.
+스트림의 처리량을 증가시킬 수 있다.
 
 그러나 병렬로 작업이 수행되기 때문에 어떤 작업이 먼저 끝날지 보장되지 않는다.
 ```
 ```
 * subscribeOn 의 매개변수
 
-subscribeOn 은 Schedulers 의 static 메서드 중 하나를 사용한다
+subscribeOn 은 Schedulers 의 static 메서드 중 하나를 사용한다 
 
 .parallel(): 고정된 스레드 풀의 스레드가 구독을 실행한다. CPU 코어의 개수가 크기가 된다. 364p 참고
 ```
 
 ### 리액티브 스트림의 데이터 버퍼링하기
+```
+리액티브 스트림의 데이터 버퍼링이란? 
+Flux 가 방출한 데이터 스트림을 작은 덩어리로 분할해서 사용하는 것을 말한다.
+```
+```
+* FluxBufferingTests 참고
+
+Flux<String> fruitFlux = Flux.just("apple", "orange", "banana","kiwi","strawberry");
+Flux<List<String>> bufferedFlux = fruitFlux.buffer(3);
+
+버퍼링을 해서 방출되는 값을 컬렉션으로 나눌 수 있다. 버퍼로 값을 나누면 동기로 작업을 수행하기 때문에
+비생산적이다.
+(컬렉션을 나눌 때까지 스레드가 동기로 움직인다는 의미 같음) 365p
+
+buffer() 를 flatMap() 과 같이 사용하면 각 List 컬렉션을 생성할 때 병행 처리할 수 있다.
+
+Flux.just("apple","orange","banana","kiwi","strawberry")
+                .buffer(3) // 버퍼로 값을 나눈다.
+                .flatMap(x -> Flux.fromIterable(x) // flatMap 으로 데이터를 매핑한다.
+                        .map(y -> y.toUpperCase())
+                        .subscribeOn(Schedulers.parallel()) // flatMap + subscribeOn 조합 비동기처리
+                        .log()).subscribe(); 
+                // 로그 오퍼레이션을 추가하고 구독해서 결과 알아보기. text 실행시 결과값이 나옴.
+                        
+컬렉션을 병행처리 했기 때문에 순서대로 실행되지 않는다. 컬렉션 값이 완성되는 대로 하나씩 방출함.  
+```
+```
+* Flux 가 방출하는 모든 항목을 List 로 모으기
+
+Flux<String> fruitFlux = Flux.just("apple", "orange","banana","kiwi","strawberry");
+Mono<List<String>> fruitListMono = fruitFlux.collectList();
+
+fruitFlux 값을 List 로 모을 수 있다. 
 
 
+collectMap 을 사용하면 좀 더 정교하게 데이터를 수집할 수 있다.
 
+Flux<String> animalFlux = Flux.just("aardvark", "elephant", "koala", "eagle", "kangaroo");
+Mono<Map<Character, String>> animalMapMono = animalFlux.collectMap(a -> a.charAt(0)); 
+// charAt 0 으로 첫 글자를 인덱스로 사용한다.
 
+StepVerifier
+        .create(animalMapMono).expectNextMatches(map -> {
+                    return
+                            map.size() == 3 &&
+                                    map.get('a').equals("aardvark") &&
+                                    map.get('e').equals("eagle") &&
+                                    map.get("k").equals("kangaroo");
+                }).verifyComplete();
+                
+발행한 데이터를 컬렉션으로 수집한다 이때 collectMap 을 사용해서 데이터의 첫 글자를
+인덱스 값으로 사용함. 인덱스가 중복되면 값이 바뀐다. 
+```
+### 리액티브 타입에 로직 오퍼레이션 수행하기
+
+리액티브 타입으로 발행한 항목이 조건에 일치하는지 알아보기. all, any 사용
+
+FluxBufferingTests.all , any 테스트 참고.
 
 
 
