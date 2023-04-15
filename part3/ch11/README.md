@@ -65,7 +65,7 @@ Flux 를 Mono<Taco> 값으로 반환하도록 하면 Mono 타입으로 값을 �
 Flux: 0, 1 또는 다수의 데이터를 갖는 파이프라인을 가진다
 Mono: 하나의 데이터 항목만 갖는 리액티브 타입
 ```
-### 함수형으로 API 요청 핸들러 만들어보기!
+### 함수형으로 API 요청 핸들러 만들어보기! (간단하게 API 등록)
 
 ```
 * 스프링의 함수형 플로그래밍 API 작성에 사용되는 타입들
@@ -171,21 +171,124 @@ $: jsonPath 의 시작점이자 root 가 된다. 가장 바깥으로 생각하�
 
 ```
 RestTemplate 은 리액티브를 지원하지 않는다 (비동기 요청)
-WebClient 의 인스턴스를 생성하거나 빈으로 주입받아서 RestTemplate 대신 사용하면 된다
+WebClient 의 인스턴스를 생성(WebClient.create()) 하거나 빈으로 주입받아서 RestTemplate 대신 사용하면 된다
+
+RestService 와 같은 개념
 ```
 ```
 * 리소스 얻기(GET)
 
-클라이언트가 GET 로 성분을 얻고 싶을 때 
+클라이언트가 GET 으로 성분을 얻고 싶을 때 
 
 Mono<Ingredient> ingredient = WebClient.create()
                 .get()
                 .uri("http://localhost:8080/ingredient/{id}", ingredientId)
-                .retrieve()
-                .bodyToMono(Ingredient.class);
+                .retrieve() // 어떻게 값을 반환할지 결정 (요청 전송)
+                .bodyToMono(Ingredient.class); // Mono<Ingredient>
 
         ingredient.subscribe(i -> {...});
         
 API 를 호출하고 방출된 스트림을 받는다. 그리고 구독해서 데이터를 넘겨준다! 
 참고로 구독하면 데이터에서 값을 직접 꺼낼 수 있다. 
+
+  Flux<Ingredient> ingredients = WebClient
+                .create()
+                .get()
+                .uri("http://localhost:8080/ingredients")
+                .retrieve()
+                .bodyToFlux(Ingredient.class); 
+
+        ingredients.subscribe(i -> {...})
+
+Flux 로 컬렉션 값 가져오기 
+```
+```
+* 오래 실행되는 요청 타임아웃 시키기
+
+Flux<Ingredient> ingredients = WebClient.create()
+            .get().uri("http://localhost:8080/ingredients")
+            .retrieve()
+            .bodyToFlux(Ingredient.class);
+        
+ingredients.timeout(Duration.ofSeconds(1))
+            .subscribe(i -> i.getId(),
+                       e -> e.printStackTrace());
+
+해당 요청이 1초를 초과하면 구독의 두 번째 인자로 오류를 만들어서 던질 수 있다. 
+```
+```
+* 리소스 전송하기
+
+Mono<Ingredient> ingredientMono = Mono.just(new Ingredient("1","o", Type.PROTEIN));
+
+        Mono<Ingredient> result = webClient.post()
+                .uri("/ingredients")
+                .body(ingredientMono, Ingredient.class)
+                .retrieve()
+                .bodyToMono(Ingredient.class);
+        
+result.subscribe(i -> {...}); 
+
+put 사용 397 참고 
+```
+```
+* 리소스 삭제하기
+
+Disposable subscribe = webClient.delete()
+                .uri("/ingredients/{id}", ingredientId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .subscribe();
+```
+### WebClient 로 에러 처리하기
+```
+에러가 생길 수 있는 Mono 나 Flux 를 구독할 때는 subscribe() 메서드를 호출할 때 
+데이터 컨슈머와 에러 컨슈머를 각각 등록해야 한다.
+
+ingredientMono.subscribe(
+ i -> { 데이터 처리} , e -> { 에러 발생시 에러 처리})
+ 
+WebClient Api 요청에 오류가 있어서 400 또는 500 오류 코드가 반환되면 두 번째 인자 e 가 실행되고 
+WebClientResponseException 를 발생시킨다. 
+
+하지만 이런 포괄적인 에러가 발생하면 무엇이 잘못된 것인지 구체적으로 알 수 없다.
+```
+```
+* 커스텀 에러 핸들러를 추가해서 에러 처리하기!
+
+Mono<Ingredient> ingredientMono = webClient
+                .get()
+                .uri("http://localhost:8080/ingredients/{id}", ingredientId)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        response -> Mono.just(new Exception()))
+                .onStatus(HttpStatus::is3xxRedirection,
+                        response -> Mono.just(new Exception()))
+                .bodyToMono(Ingredient.class);
+        
+        ingredientMono.subscribe(i -> {...});
+
+onStatus 를 이용하면 api 요청시 발생한 오류코드에 맞는 익셉션을 만들어서 던질 수 있다.
+onStatus 는 여러 번 호출할 수 있다! 
+```
+
+### 요청 교환하기 
+
+.retreive() 대신 exchange 를 호출하면 더 많은 기능을 사용할 수 있다.
+```
+exchangeMono() or exchagneFlux() 를 사용하면 반환되는 객체를 모노 타입으로 만들기 전 flatMap 을 이용해서
+조건을 추가할 수 있다. 
+
+true 값을 갖는 X_UNAVAILABLE 이라는 헤더가 포함되면 empty Mono 를 반환하기 
+
+Mono<Ingredient> ingredientMono = webClient
+             .get()
+             .uri("http://localhost:8080/ingredients/{id}", ingredientId)
+             .exchangeToMono(c -> {
+                 if(c.headers().header("X_UNAVAILABLE").contains("true")){
+                     return Mono.empty();
+                 }
+                 return Mono.just(c);
+             })
+             .flatMap(c -> c.bodyToMono(Ingredient.class));
 ```
