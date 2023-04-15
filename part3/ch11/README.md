@@ -292,3 +292,19 @@ Mono<Ingredient> ingredientMono = webClient
              })
              .flatMap(c -> c.bodyToMono(Ingredient.class));
 ```
+
+### 리액티브 웹 API 보안 
+
+리액티브용 스프링 시큐리티를 사용하면 서블릿을 사용하지 않는 리액티브 애플리케이션 서버(Netty 등)에서도
+
+스프링 시큐리티를 사용할 수 있다. (기존 사용 방법과 큰 차이 없음) 
+
+```
+* SecurityConfig 참고
+
+@EnableWebFluxSecurity // 웹 플럭스 시큐리티로 사용
+SecurityWebFilterChain 을 반환 타입으로 받으면 리액티브용 스프링 시큐리티로 사용 가능.
+
+antMatchers 대신 .pathMatchers("/design","/orders") 를 사용하면 모든 경로를 의미하는
+/** 을 지정할 필요가 없다. 지정된 경로 외의 경로에 접근할 수 있게 해준다! 
+```
