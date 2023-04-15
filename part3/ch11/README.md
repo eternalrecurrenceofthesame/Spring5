@@ -308,3 +308,4 @@ SecurityWebFilterChain 을 반환 타입으로 받으면 리액티브용 스프�
 antMatchers 대신 .pathMatchers("/design","/orders") 를 사용하면 모든 경로를 의미하는
 /** 을 지정할 필요가 없다. 지정된 경로 외의 경로에 접근할 수 있게 해준다! 
 ```
+그 외 스프링 시큐리티 저장소 참고 ! 
