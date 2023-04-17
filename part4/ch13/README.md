@@ -10,7 +10,7 @@
   * 마이크로 서비스는 다른 MS 와 공유되지 않는 빌드 의존성을 가지므로 라이브러리 충돌이 생기지 않는다.
   * 마이크로 서비스는 독자적으로 메모리할당 및 인스턴스의 수를 조정할 수 있다.(규모)
   * 각 마이크로 서비스별 적용할 테크놀러지를 다르게 선택할 수 있다.
-  * 마이크로 서비스는 언제든 프로덕션으로 이양할 수 있다. (MS 별 각각 배포)
+  * 마이크로 서비스는 언제든 프로덕션(실무환경)으로 이양할 수 있다. (MS 별 각각 배포)
 
 마이크로 서비스가 항상 적합한 것은 아니다 규모가 작은 프로젝트일 경우 모놀리틱 구조로 시작해서
 
@@ -31,7 +31,7 @@
 마이크로 서비스로 분류할 수 있다.
 ```
 ```
-* 유레카를 이요한 마이크로 서비스 간 호출 예시
+* 유레카를 이한 마이크로 서비스 간 호출 예시
 
 MS1 이 MS2 를 호출해야 한다면 유레카에서 MS2 의 이름으로 등록된 인스턴스 정보를 찾아서 호출하면 된다.
 그리고 MS1 은 MS2 의 어떤 인스턴스를 사용할지 선택해야 한다.
@@ -62,7 +62,133 @@ MS1 이 MS2 를 호출해야 한다면 유레카에서 MS2 의 이름으로 등�
 	<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
 </dependency>
 
+spring:
+  config:
+    import: "optional:configserver:" // yml 설정 추가 
+
 부트스트랩 클래스에 @EnableEurekaServer 애노테이션을 지정하고 애플리케이션을 실행하면
 유레카 웹 대시보드가 나타난다.
 ```
+```
+프로덕션 환경에서 유레카 서버는 클러스터로 구성하는 것이 좋다. 유레카 서버에 문제가 발생해도 다른 유레카
+서버를 사용할 수 있게 하면 문제가 발생하지 않는다.
+
+유레카는 다른 유레카 서버로부터 서비스 레지스트리를 가져오고, 다른 유레카 서버의 서비스에 자신을 등록해서
+사용하면 된다.
+
+실무에서는 클러스터로 사용하면 되지만 개발환경에서는 유레카 서버를 두 개 이상 실행하는 것은 불편하고 불필요하다.
+
+그러나 유레카 서버를 올바르게(클러스터로) 구성하지 않으면 유레카는 30초마다 예외 형태의 로그 메시지를 출력한다.
+유레카는 30 초마다 다른 유레카 서버와 통신하면서 자신이 작동 중임을 알리고 레지스트리 정보를 공유함.
+
+오류 로그를 받지 않으려면 유레카 서버가 혼자임을 알도록 알려줘야 한다.
+```
+
+### 개발 환경 유레카 yml 설정
+```
+server:
+  port: 8761 # 서버 포트 지정하기 
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    fetchRegistry: false      # 다른 유레카 서버로부터 정보 가지고 오기
+    registerWithEureka: false # 다른 유레카 서버의 서비스로 자신을 등록하기 
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+fetchRegistry, registerWithEureka 는 유레카와 상호작용하는 방법을 알려주기 위해 다른 마이크로
+서비스에 설정할 수 있는 속성 (유레카 역시 마이크로 서비스, 두 개의 기본값은 true)
+
+defaultZone 에는 유레카 서버 주소를 등록한다, 유레카 서버는 하나 이상 등록할 수 있다. 448p
+```
+```
+* 자체-보존 모드 비활성화 시키기
+
+유레카 서버는 서비스 인스턴스(유레카 서버를 사용하는 클라이언트? 449p) 에서 자신을 등록하고 갱신 요청을 
+30초 마다 전송하기를 기대한다. 
+(해당 서비스가 살아 있어서 사용할 수 있는지 확인하기 위함)
+
+일반적으로 3 번의 갱신기간 동안 갱신되지 않으면 해당 인스턴스의 등록을 취소하게 된다.
+(해당 서비스 인스턴스가 삭제되어서 사용할수 없게 됨)
+
+이렇게 중단되는 서비스의 수가 임계 값을 초과하면 유레카 서버는 네트워크에 문제가 생긴 것으로 간주하고
+레지스트리에 등록된 나머지 서비스 데이터를 보존하기 위한 자체 보존 모드가 되어서 추가적인 서비스 인스턴스의
+등록 취소가 방지된다.
+
+프로덕션 환경에서는 true 값을 설정하는 것이 좋지만 유레카 갱신 요청을 받을 수 없는 개발 환경에서는 이 속성을
+false 로 하는 것이 유용하다.
+서비스 인스턴스의 상태가 자주 변경될 수 있는 개발 환경에서 자체 보존 모드가 활성화되면 중단된 서비스의 등록이
+계속 유지되어 다른 서비스가 해당 서비스를 사용하려고 할 때 문제가 생길 수 있다.
+
+eureka:
+  server:
+    enableSelfPreservation: false
+```
+
+### 유레카 확장하기
+
+앞서 설명했지만 개발시에는 단일 유레카 인스턴스가 편리하지만 프로덕션 환경에서는 고가용성을 위해
+
+최소 두 개의 유레카 인스턴스를 가져야 한다.
+
+```
+* 프로덕션 환경의 스프링 클라우드 설정 
+
+스프링 프로파일을 지정하면 간단하게 두 개 이상의 유레카 인스턴스를 구성할 수 있다. 
+
+# 프로덕션 환경 설정 application.yml 참고 #
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://${other.eureka.host}:${other.eureka.port}/eureka/
+---
+spring:
+  profiles: eureka-1
+  application:
+    name: eureka-1
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: eureka1.tacocloud.com
+
+other:
+  eureka:
+    host: eureka2.tacocloud.com
+    port: 8762
+---
+spring:
+  profiles: eureka-2
+  application:
+    name: eureka-2
+
+server:
+  port: 8762
+
+eureka:
+  instance:
+    hostname: eureka2.tacocloud.com
+
+other:
+  eureka:
+    host: eureka1.tacocloud.com
+    port: 8761
+    
+```
+## 서비스 등록하고 찾기
+
+```
+
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+
+``
 
