@@ -136,50 +136,12 @@ eureka:
 ```
 * 프로덕션 환경의 스프링 클라우드 설정 
 
-스프링 프로파일을 지정하면 간단하게 두 개 이상의 유레카 인스턴스를 구성할 수 있다. 
-
 # 프로덕션 환경 설정 application.yml 참고 #
-eureka:
-  instance:
-    hostname: localhost
-  client:
-    serviceUrl:
-      defaultZone: http://${other.eureka.host}:${other.eureka.port}/eureka/
----
-spring:
-  profiles: eureka-1
-  application:
-    name: eureka-1
 
-server:
-  port: 8761
+https://medium.com/@ali_boussouf/spring-cloud-eureka-replicas-df163ed920fe 참고
 
-eureka:
-  instance:
-    hostname: eureka1.tacocloud.com
-
-other:
-  eureka:
-    host: eureka2.tacocloud.com
-    port: 8762
----
-spring:
-  profiles: eureka-2
-  application:
-    name: eureka-2
-
-server:
-  port: 8762
-
-eureka:
-  instance:
-    hostname: eureka2.tacocloud.com
-
-other:
-  eureka:
-    host: eureka1.tacocloud.com
-    port: 8761
-    
+교재 내용과 완전히 다르다.. 교재의 내용으로는 안 됨.. 도대체 왜 아예 상관 없는 내용을 적어 뒀는지
+모르겠다..
 ```
 ## 서비스 등록하고 찾기
 
