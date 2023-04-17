@@ -18,17 +18,17 @@
 
 ```
 Mono 추출
-tacoMono.lock();
+Iterable<Taco> = tacoMono.lock();
 tacoRepo.save(taco);
 
 Flux 추출
-tacoFlux.toIterable()
+Iterable<Taco>  tacos = tacoFlux.toIterable()
 tacoRepo.saveAll(tacos);
 
 tacoFlux.subscribe(taco -> {tacoRepository.save(taco));
 subscribe 를 이용한 일괄처리 (리액티브 방식의 구독을 사용하므로 블로킹 일괄처리보다 바람직)
 
-이처럼 리액티브를 블로킹한 상태에서 값을 저장하면됨. 이렇게 사용하는 경우 최소한의 경우에만 사용해야 한다.
+이처럼 리액티브를 블로킹한 상태에서 값을 저장하면됨. 이렇게 사용하는 경우 최소한의 경우에만 사용해야 한다. 411p
 ```
 
 ## 리액티브 카산드라 리포지토리 사용하기
@@ -74,7 +74,7 @@ data:
 @Document(collection="ingredients") 를 이용해서 이름 설정을 변경할 수 있다.
 
 @Id 는 springframework.data.annoation 를 사용한다.
-아이디 속성은 String, Long, Serializable 을 사용할 수 있다. (자바에서 String 은 Serilizable 을 구현함)
+아이디 속성은 String, Long, Serializable 을 사용할 수 있다. (자바에서 String 은 Serilizable 을 구현함) 431p
 ```
 ```
 * Taco 참고
@@ -84,10 +84,35 @@ data:
 
 컬렉션을 저장할 때는 사용자 정의 타입? 을 만들 필요 없이 @Document 가 지정된 타입이나 단순 
 자바 객체 타입이나 모두 저장할 수 있다. (따로 설정을 안해줘도 됨 ㄷㄷ) 431p
+
+그 외 Order, User 참고 필요한 설명은 다 함 몽고디비를 사용하면 매우 간단하게 매핑할 수 있다! 
+```
+
+### 리액티브 몽고DB 리포지토리 인터페이스 작성하기
+
+스프링 데이터 몽고 DB 를 사용해보자! 
+
+```
+참고
+
+리액티브가 아닌 몽고 DB 리포지토리를 스프링 데이터로 사용하려면 ReactieCrudRepository 나 
+ReactiveMongoRepository 대신 CrudRepository 나 MongoRepository 를 확장하는 리포지토리
+
+인터페이스를 작성하면 된다.
+
+범용적인 ReactiveCrudRepository 대신 몽고디비 전용 리액티브 리포지토리를 사용하면 데이터베이스 변경시 
+리팩토링해야 한다 전용 리포지토리를 사용한다면 이것을 감안하고 특화된 리포지토리를 사용할 가치가 있는지 판단해야한다.
 ```
 ```
-* Order 참고
+* 리액티브 타입을 사용하면서 페이징 적용하기
 
+데이터 조회 후 take 로 가지고 올 개수만 지정해주면 된다. JPA 에서 사용하는 Pageable 인자는 사용하지 않는다.
 
+Flux<Taco> findByOrderByCreatedAtDesc();
+Flux<Taco> recents = repository.findByOrderByCreatedAtDesc().take(12);
+
+쿼리메소드를 사용하고 take 하든 그냥 take 해도 된다. 
+
+data 참고 
 ```
 
