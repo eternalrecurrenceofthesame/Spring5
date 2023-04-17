@@ -136,7 +136,7 @@ eureka:
 ```
 * 프로덕션 환경의 스프링 클라우드 설정 
 
-# 프로덕션 환경 설정 application.yml 참고 #
+# 프로덕션 환경 설정 appliation.yml, bootstrap.yml 참고 #
 
 https://medium.com/@ali_boussouf/spring-cloud-eureka-replicas-df163ed920fe 참고
 
@@ -146,11 +146,34 @@ https://medium.com/@ali_boussouf/spring-cloud-eureka-replicas-df163ed920fe 참�
 ## 서비스 등록하고 찾기
 
 ```
-
 <dependency>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 </dependency>
+```
+```
+* 서비스 yml 설정
 
-``
+spring:
+  application:
+    name: ingredient-service
+    
+서비스 이름을 설정한다
+
+server:
+  port: 0
+
+서비스 포트를 0 으로 설정하면 애플리케이션 시작시 포트 번호가 무작위로 선택된다.
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8061/eureka/
+      		   http://localhost:8062/eureka/
+		   http://localhost:8062/eureka/
+      
+유레카 서버에 등록되도록 유레카 서버를 지정한다, 서버가 중단되어도 사용할 수 있게 앞서 복사한 
+서버를 등록해줄 수 있다.
+```
+
 
