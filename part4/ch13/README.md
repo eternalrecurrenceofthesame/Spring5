@@ -136,14 +136,19 @@ eureka:
 ```
 * 프로덕션 환경의 스프링 클라우드 설정 
 
-# 프로덕션 환경 설정 appliation.yml, bootstrap.yml 참고 #
+# 프로덕션 환경 설정 appliation.yml 참고 #
 
-https://medium.com/@ali_boussouf/spring-cloud-eureka-replicas-df163ed920fe 참고
+프로덕션 환경에서 유레카를 레플리케이션 하는 방법
+https://medium.com/@ali_boussouf/spring-cloud-eureka-replicas-df163ed920fe 
+https://www.youtube.com/watch?v=Y3JxNzBSOp0
 
-교재 내용과 완전히 다르다.. 교재의 내용으로는 안 됨.. 도대체 왜 아예 상관 없는 내용을 적어 뒀는지
-모르겠다..
+교재에 있는 내용과 완전히 다르다. 교재에 있는 내용으로는 레플리케이션을 할 수 없다.
+대체 왜 안되는 적어둔거지.. 
+
 ```
 ## 서비스 등록하고 찾기
+
+eurekaclient 참고
 
 ```
 <dependency>
@@ -156,24 +161,27 @@ https://medium.com/@ali_boussouf/spring-cloud-eureka-replicas-df163ed920fe 참�
 
 spring:
   application:
-    name: ingredient-service
+    name: eureka-client-service
     
 서비스 이름을 설정한다
 
 server:
   port: 0
 
-서비스 포트를 0 으로 설정하면 애플리케이션 시작시 포트 번호가 무작위로 선택된다.
+서비스 포트를 0 으로 설정하면 각 서비스 애플리케이션 시작시 포트 번호가 무작위로 선택된다.
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8061/eureka/
-      		   http://localhost:8062/eureka/
-		   http://localhost:8062/eureka/
+      defaultZone: http://eureka-1-server.com:9001/eureka/, http://eureka-1-server.com:9002/eureka/
       
 유레카 서버에 등록되도록 유레카 서버를 지정한다, 서버가 중단되어도 사용할 수 있게 앞서 복사한 
-서버를 등록해줄 수 있다.
+서버를 등록한다.
+```
+```
+* 서비스 사용하기
+
+
 ```
 
 
