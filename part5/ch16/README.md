@@ -179,31 +179,31 @@ TacoCountInfoContributor 참고
 ```
 * 빌드 정보를 /info 엔드포인트에 주입하기
 
-<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-					<goals>
-						<goal>build-info</goal>
-					</goals>
-					</execution>
-				</executions>
+ <build>
+    <plugins>
+	<plugin>
+          <groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-maven-plugin</artifactId>
+		<executions>
+		<execution>
+		<goals>
+		<goal>build-info</goal>
+		</goals>
+		</execution>
+		</executions>
         
 추가시 어떤 버전의 애플리케이션이 실행중이고 언제 빌드되었는지 정확하게 알 수 있따. (플러그인 적용시 빌드 필요)
 ```
 ```
-* Git 커밋 정보 노출하기
+* Git 커밋 정보 노출하기 
 <build> 추가
   <plugins>
   ...
-<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
-				<version>4.9.10</version>
-			</plugin>
+</plugin>
+ <plugin>
+<groupId>pl.project13.maven</groupId>
+<artifactId>git-commit-id-plugin</artifactId>
+</plugin>
 
 management:
   info:
@@ -226,7 +226,12 @@ drity: 프로젝트가 빌드되었을 당시에 빌드 디렉터리에 커밋�
 실제로는 외부 시스템에 원격 호출을 한 후 받은 응답을 기준으로 건강 상태를 결정하는 것을 고려해서 만들 수 있다.
 ```
 
-### 커스텀 메트릭 등록하기 
+### 커스텀 메트릭 등록하기 (실습 미비!!)
+
+스프링 액추에이터는 Micrometer 로 구현된다 Micrometer 의 MeterRegistry 를 사용하면 메트릭을 발행할 수 있다.
+
+간단하게 주입해서 사용하면 된다.
+
 ```
 * TacoMetrics 참고 
 
@@ -236,5 +241,13 @@ AbstractRepositoryEventListner 는 리포지토리 이벤트를 가로챌 수 �
 onAfterCreate 메서드는 타코가 저장될 때 마다 호출된다.
 
 타코가 저장될 때 마다 타코 카운트를 계산하고 사용된 타코의 식자재재의 카운트를 계산하는 메트릭.
+
+localhost:8087/actuator/metrics/tacocloud
+localhost:8087/actuator/metircs/taclcloud?tag=ingredient:FLTO
 ```
 
+### 커스텀 엔드포인트 생성하기
+```
+* NotesEndpoint
+
+```
