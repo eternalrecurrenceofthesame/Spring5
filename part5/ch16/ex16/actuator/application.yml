@@ -1,0 +1,86 @@
+spring:
+  data:
+    rest:
+      base-path: /api
+
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+    git:
+      mode: full
+
+
+info:
+  contact:
+    email: email@email.com
+    phone: 1234-1234
+
+
+
+#  kafka:
+#    bootstrap-servers:
+#      - kafka.tacocloud.com:9092
+#      - kafka.tacocloud.com:9093
+#      - kafka.tacocloud.com:9094
+#    default-topic: tacocloud.orders.topic
+
+#  rabbitmq:
+#    host: rabbit.tacocloud.com
+#    port: 5673
+#    username: user
+#    password: 1234
+#  template:
+#    exchange: tacocloud.orders
+#    routing-key: kitchens.central
+#    receive-timeout: 30000
+
+#  jms:
+#    template:
+#      default-destination: tacocloud.order.queue
+#  artemis:
+#    host: artemis.tacocloud.com
+#    port: 61617
+#    user: tacoweb
+#    password: 12345
+
+#spring:
+#  profiles:
+#    active:
+
+#  datasource:
+#    url:
+#    username:
+#    password:
+#    driver-class-name:
+#    schema:
+#    data:
+#    jndi-name:
+
+#server:
+#  port:
+#  ssl:
+#    key-store:
+#    key-store-password:
+#    key-password:
+
+#logging:
+#  path:
+#  file:
+#  level:
+#    root:
+#    org:
+#      springframework:
+#        security:
+
+#taco:
+#  orders:
+#    pageSize:
