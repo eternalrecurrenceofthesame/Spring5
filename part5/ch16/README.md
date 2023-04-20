@@ -183,7 +183,7 @@ TacoCountInfoContributor 참고
     <plugins>
 	<plugin>
           <groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-maven-plugin</artifactId>
+		<artifactId>spring-boot-maven-plugin</artifactId> // 위치 유의
 		<executions>
 		<execution>
 		<goals>
