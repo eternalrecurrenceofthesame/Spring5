@@ -44,14 +44,25 @@ spring:
         url: http//:localhost:9090
 ```
 ### 유레카 클라이언트를 사용해서 어드민에 등록하기
+
 ```
-	<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-      <version>3.1.5</version>
-	</dependency>
-  
-yml 설정은 위와 같다.
+<dependency>
+<groupId>org.springframework.cloud</groupId>
+<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+<version>3.1.5</version>
+</dependency>
+```
+```
+* yml 설정 
+
+spring:
+  application:
+    name: taco-client
+  boot:
+    admin:
+      client:
+        url: http//:localhost:9090
+```
 
 유레카 서비스를 유레카 레지스트리 서버에 등록하면 유레카에 등록된 어플리케이션을 스프링 부트 어드민이
 자동으로 찾아서 액추에이터 데이터를 보여준다 
@@ -65,6 +76,7 @@ yml 설정은 위와 같다.
 사용자 친화적인 환경으로 확인 가능!
 
 ### Admin 서버의 보안
+
 ```
 * 어드민 서버에 로그인 활성화 하기
 
