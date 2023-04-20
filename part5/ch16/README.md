@@ -248,6 +248,36 @@ localhost:8087/actuator/metircs/taclcloud?tag=ingredient:FLTO
 
 ### 커스텀 엔드포인트 생성하기
 ```
-* NotesEndpoint
+* NotesEndpoint 참고 (간단한 메모 엔드포인트 실용성은 없음)
+
+액츄에이터의 엔드포인트는 일반적인 컨트롤러와 다르게 구성된다.
+
+@Controller 대신 사용대는 애노테이션 
+@Eendpoint(id="notes", enableByDefault=true) // id 가 notes 인 엔드포인트 생성, 기본적인 활성화 true 
+
+
+GET, POST, DELETE 대신 사용되는 애노테이션
+@ReadOperation, @WriteOperation, @DeleteOperation
+
+POST {"text" : "Hello"}
+```
+### 액추에이터 보안 처리하기
+
+유효한 접근 권한을 가진 클라이언트만 엔드포인트를 소비할 수 있게 하기
+
+액추에이터의 보안은 스프링 시큐리티로 해결해야 한다. 보안 자체는 액추에이터의 책임 범위를 벗어남
 
 ```
+* 예시
+
+http.requestMatcher(EndpointRequest.toAnyEndpoint().excluding("health","info))
+.authorizeRequests().anyRequest().hasRole("ADMIN")
+전체적용 + 헬스 인포 제외
+
+
+http.requestMatcher(EndpointRequest.to("beans","threaddump"))
+.authorizeRequests().anyRequest().hasRole("ADMIN")
+빈, 스레드에만 적용 
+```
+
+
