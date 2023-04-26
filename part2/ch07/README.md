@@ -1,6 +1,6 @@
 # REST 서비스 이용하기
 ```
-REST 서비스는 클라이언트의 API 요청을 호출해주는 클래스다. RestAPI -> RestService 호출 
+REST 서비스는 클라이언트의 API 요청을 호출해주는 클래스다. RestService 를 호출해서 다른 서버의 API 를 호출한다.
 
 REST 서비스는 말 그대로 REST API 를 제공해주는 서비스! 앞서 만든 리소스와 어셈블러는 
 REST API 요청을 처리하는 API!
