@@ -44,7 +44,6 @@ spring:
         url: http//:localhost:9090
 ```
 ### 유레카 클라이언트를 사용해서 어드민에 등록하기
-
 ```
 <dependency>
 <groupId>org.springframework.cloud</groupId>
