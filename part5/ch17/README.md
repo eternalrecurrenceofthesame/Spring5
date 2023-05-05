@@ -8,10 +8,10 @@
 
 ### Admin 서버 생성하기
 ```
-	<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-starter-server</artifactId>
-		</dependency>
+<dependency>
+<groupId>de.codecentric</groupId>
+<artifactId>spring-boot-admin-starter-server</artifactId>
+</dependency>
     
 부트스트랩 클래스에 @EnableAdminServer 를 추가한 후 서버 포트를 9090 으로 변경!
 ```
@@ -27,9 +27,9 @@
 ### 애플리케이션이 자신을 어드민 서버에 등록하기
 ```
 <dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>spring-boot-admin-server-client</artifactId>
-      <version>2.6.2</version> // 버전 정보를 명시해야 한다.
+<groupId>de.codecentric</groupId>
+<artifactId>spring-boot-admin-server-client</artifactId>
+<version>2.6.2</version> // 버전 정보를 명시해야 한다.
 </dependency>
 ```
 ```
