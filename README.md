@@ -9,16 +9,16 @@
   * ch5 [구성 속성 사용하기](https://github.com/eternalrecurrenceofthesame/Spring5/blob/main/part1/ch05/README.md)
 
 * PART2 통합된 스프링
-  * ch6 REST 서비스 생성하기
-  * ch7 REST 서비스 사용하기
-  * ch8 비동기 메시지 전송하기
-  * ch9 스프링 통합하기
+  * ch6 [REST 서비스 생성하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part2/ch06)
+  * ch7 [REST 서비스 사용하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part2/ch07)
+  * ch8 [비동기 메시지 전송하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part2/ch08)
+  * ch9 [스프링 통합하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part2/ch09)
   
 * PART3 리액티브 스프링
- * ch10 [리액터 개요](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part3/ch10)
- * ch11 [리액티브 API 개발하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part3/ch11)
- * ch12 [리액티브 데이터 퍼시스턴스](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part3/ch12)
+  * ch10 [리액터 개요](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part3/ch10)
+  * ch11 [리액티브 API 개발하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part3/ch11)
+  * ch12 [리액티브 데이터 퍼시스턴스](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part3/ch12)
 
 * PART5 스프링 배포
- * ch16 [스프링 부트 액추에이터 사용하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part5/ch16)
- * ch17 [스프링 관리하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part5/ch17)
+  * ch16 [스프링 부트 액추에이터 사용하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part5/ch16)
+  * ch17 [스프링 관리하기](https://github.com/eternalrecurrenceofthesame/Spring5/tree/main/part5/ch17)
