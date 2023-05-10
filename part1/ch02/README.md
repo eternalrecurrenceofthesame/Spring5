@@ -1,16 +1,14 @@
 # 웹 애플리케이션 개발하기
 
-타코 클라우드를 개발하자! 
-
 ## 정보 보여주기 
-
+```
 * 도메인 생성
-
 Taco, Ingredient 참고
-
+```
+```
 * 컨트롤러 생성
-
 DesignTacoController 참고
+```
 ```
 요청-대응 애노테이션
 
@@ -38,13 +36,12 @@ pirvate List<Ingredient> filterByType(List<Ingredient> ingredients, Type type){
 // 타입 값을 소문자로 만들고 필터 메서드로 타입에 해당하는 성분만 걸러서 model 값에 추가!
 ```
 
-* 뷰 디자인 하기 (타임리프 사용) 
+## 뷰 디자인 하기 (타임리프 사용) 
 
 #### + 간단한 타임리프 정리
-
-design.html, orderForm.html 참고
-
 ```
+* design.html, orderForm.html 참고
+
 ${...} // 변수 표현식 모델에 담긴 변수에 직접 접근한다
 
 th:src="@{/images/TacoCloud.png} // static 소스 가지고 오기"
@@ -89,10 +86,10 @@ HTTP accept-language 헤더 값을 통해서 국제화 적용
 스프링 부트를 사용하면 메시지 소스 빈과 기본 messages 리소스 이름을 사용할 수 있다.
 spring.messages.basename=messages // proprties 기본 값
 ```
+
 그외 styles.css, 메시지 국제화 참고
 
-
-* 폼 제출 처리하기
+## 폼 제출 처리하기
 
 OrderController, Order, orderForm.html 참고
 
@@ -102,20 +99,22 @@ OrderController, Order, orderForm.html 참고
 
 (스프링 부트 웹 스타터에 자동으로 추가된다 ?? 57p 왜 없지 )
 
+```
 * 유효성 검사 규칙 선언하기
 
 Taco, Order 참고 javax.validation 애노테이션을 이용한 검사 추가.
 
-```
 @Digits(ineger=3, fraction=0, message="Invalid CVV") // 입력 값이 정확히 3 자리 숫자인지 검사
 private Strinc ccCVV;
 ```
+```
 * 폼과 바인딩될 때 유효성 검사 수행하는 방법
 
-DesignTacoController, OrderController
-
+DesignTacoController, OrderController 참고
 ```
-검증 애노테이션
+```
+* 검증 애노테이션
+
 @Valid(자바 표준), @Validated(스프링 전용) // @Validated 에는 그룹스 기능이 있는데 잘 사용안함 
 등록에서 필요한 정보와, 수정에서 필요한 정보가 다르기 때문에 그룹으로 검증하지 않고 각각의 폼을 만들어야 한다.
 
@@ -125,12 +124,9 @@ BindingResult 는 @ModelAttribute 값 다음에 위치해야 한다!
 
 ## 뷰 컨트롤러로 작업하기
 
-지금까지 3 가지의 컨트롤러를 작성하였음 (Home, Order, DesignTaco)
+지금까지 3 가지의 컨트롤러를 작성하였음 (Home, Order, DesignTaco) 모델을 정의하지 않거나 사용자 입력처리를 하지않는
 
-모델을 정의하지 않거나 사용자 입력처리를 하지않는 home controller 는 WebMvcConfigurer 인터페이스를 
-
-이용하여 간소하게 만들 수 있다. (인터페이스지만 메서드의 기본 구현을 제공)
-
+home controller 는 WebMvcConfigurer 인터페이스를  이용하여 간소하게 만들 수 있다. (인터페이스지만 메서드의 기본 구현을 제공)
 ```
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -138,24 +134,24 @@ public class WebConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("home");
     }}
-```
+    
 ViewControllerRegistry 는 하나 이상의 뷰 컨트롤러를 등록할 수 있다.
+```
 
 ## 뷰 템플릿 라이브러리 선택하기
-
-spring-boot-starter-thymeleaf 를 xml 에 추가하면 스프링 부트가 애플리케이션 시작 시점에
-
-타임리프를 찾고 빈으로 등록 해준다. (/templates 티렉토리에 템플릿만 작성하면 됨)
-
+```
+spring-boot-starter-thymeleaf 를 xml 에 추가하면 스프링 부트가 애플리케이션 시작 시점에 타임리프를 찾고 빈으로 등록 해준다. 
+(/templates 티렉토리에 템플릿만 작성하면 된다.)
+```
+```
 * 템플릿 캐싱이란?
 
 기본적으로 템플릿은 최초 사용 시점에 한번만 파싱(코드 분석) 되어 파싱된 결과를 캐싱해서 사용한다.
-
 (불필요한 파싱을 방지해서 성능의 향상)
-
+```
 ```
 spring.thymeleaf.chache=false 설정을 사용하면 템플릿 캐싱을 끌 수 있다 하지만
 
-직접 설정하는 대신 DevTools 를 사용하는 것이 더 유용하다. 모든 템플릿 라이브러리에
-적용할 수 있고 배포시 DevTools 자신이 스스로 비활성화 되어 템플릿 캐싱이 활성화됨.
+직접 설정하는 대신 DevTools 를 사용하는 것이 더 유용하다. 모든 템플릿 라이브러리에 적용할 수 있고 배포시 DevTools 자신이 스스로 
+비활성화 되어 템플릿 캐싱이 활성화됨.
 ```
