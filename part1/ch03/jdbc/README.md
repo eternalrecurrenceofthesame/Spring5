@@ -1,11 +1,8 @@
 # 데이터로 작업하기
 
-## JDBC 를 사용해서 데이터 읽고 쓰기
+## JdbcIngredientRepository (NamedParameterJdbcTemplate 사용)
 
-#### + JdbcIngredientRepository 만들기
-
-JdbcIngredientRepository 참고
-
+ JdbcIngredientRepository 참고
 ```
 private final NamedParameterJdbcTemplate jdbc;
 
@@ -64,25 +61,20 @@ member.setUsername(rs.getString("username"));
 TIP 간소화 버전은 호출할 때 메서드 명으로 사용해야 한다
 ex)Ingredient ingredient = jdbc.queryForObject(sql, param, mapRowToIngredient());
 ```
-
-* 컨트롤러에 리포지토리 주입해서 사용하기
-
-DesignTacoController 참고
-
-* 스키마 정의 및 데이터 추가
-
-정의한 schema.sql 파일은 src/main/resources 폴더에 저장하자 data.sql, schema.sql 참고
-
-#### ++ JdbcTacoRepository
-
-JdbcTacoRepository 참고
-
-우리가 만든 타코는 컬렉션으로 성분값을 가지고 있음 하지만 데이터베이스는 컬렉션을 저장할 수 없다!
-
-그렇기 때문에 | Taco, TacoIngredient, Ingredient | 3 개의 테이블을 만들어서 관리하면 된다.
-
-* 기본키 전략으로 Identity 를 사용할때 데이터베이스에 저장된 키값 가지고오는 방법 (JDBC)
+## JdbcTacoRepository (JDBC 를 사용해서 컬렉션 저장하기) 
 ```
+* JdbcTacoRepository 참고
+
+우리가 만든 타코는 컬렉션으로 성분값을 가지고 있다.(일대 다의 관계) 하지만 데이터베이스는 컬렉션을 저장할 수 없다! 그렇기 때문에 
+테이블을 만들 때| Taco(타코), TacoIngredient(타코의 성분), Ingredient(성분) | 3 개의 테이블을 만들고 중간 테이블에서 
+
+타코의 id 값과 성분 id 값을 가지는 TacoIngredient 테이블을 만들고 PK 값을 이용해서 관리하면 된다.
+ex) 타코 1 (성분 1, 2) 
+    타코 2 ( 성분 2, 3)
+```
+```
+* 기본키 전략으로 Identity 를 사용할때 데이터베이스에 저장된 키값 가지고오는 방법 (JDBC)
+
 KeyHolder keyHolder = new GeneratedKeyHolder();
 jdbc.update(sql, param, keyHolder);
 
@@ -91,19 +83,10 @@ return keyHolder.getKey().longValue();
 키홀더를 만들고 sql, 파라미터, 키홀더 값을 같이 넘겨주면 된다!
 ```
 
-* DesignTacoController 
+## JdbcOrderRepository (SimpleJdbcInsert 사용)
 ```
-@SessionAttributes("order") 
+* JdbcOrderRepository 참고
 
-주문은 다수의 HTTP 요청에 걸쳐 존재해야 한다. 다수의 타코를 생성하고 하나의 주문으로
-추가하기 위해 모델 정보를 http 세션값에 저장해서 응답
-```
-
-#### + JdbcOrderRepository
-
-JdbcOrderRepository 참고
-
-```
 SimpleJdbcInsert 을 이용해서 insert sql 간소화 하기
 
 private SimpleJdbcInsert orderInserter;
@@ -114,38 +97,56 @@ this.orderInserter = new SimpleJdbcInsert(dataSource)
                 //.usingColumns(" ... ") insert 칼럼을 지정하고 싶을 때 사용
 ```
 ```
-SimpleJdbcInsert 를 사용할 때 파라미터 값을 매핑하는 방법
+* SimpleJdbcInsert 를 사용할 때 파라미터 값을 매핑하는 방법 (주문 저장하기)
 
 private ObjectMapper objectMapper;
 this.objectMapper = new ObjectMapper();
 
-Map<String, Object> values = objectMapper.convertValue(order, Map.class);
-orderInserter.executeAndReturnKey(values).longValue();
+private long saveOrderDetails(Order order){
+        @SuppressWarnings("unchecked")
+        Map<String, Object> values = objectMapper.convertValue(order, Map.class);
+                                    values.put("placedAt", order.getPlacedAt()); 
+                         // objectMapper 는 Date 값을 Long 으로 반환하므로 직접 매핑해야 한다. 97 p 
+
+        long orderId = orderInserter
+                .executeAndReturnKey(values).longValue();
+
+return orderId;}
 
 오브젝트 매퍼를 만들고 객체를 맵 파라미터로 바꾼 다음 SimpleJdbcInsert 로 execute 하면 된다.
+```
+```
+* 컬렉션 저장하기
 
-Map<String, Object> values = new HashMap();
-values.put("tacoOrder", orderId);
-values.put("taco", taco.getId);
-
-orderTacoInserter.execute(values);
-
+컬렉션은 앞서도 설명했지만 테이블에 직접 저장할 수 없기 때문에 아이디 값을 저장해야한다. 
 칼럼과 파라미터 값을 직접 넣고 싶다면 Map 객체를 만들고 SimpleJdbcInsert 를 사용하면 된다.
+
+private void saveTacoToOrder(Taco taco, long orderId){
+       Map<String, Object> values = new HashMap<>();
+       values.put("tacoOrder", orderId);
+       values.put("taco", taco.getId());
+       orderTacoInserter.execute(values);}
 ```
 
-* OrderController
+## Controller(@SessionAttribute 사용하기)
 
-주문 컨트롤러에서는 타코 디자인 컨트롤러에서 받은 세션값을 받고 주문을 데이터베이스에 저장한 후
+### DesignTacoController 참고
+```
+@SessionAttributes("order") 
 
-세션을 완료해서 이전 세션값을 초기화한다.
+주문은 다수의 HTTP 요청에 걸쳐 존재해야 한다. 다수의 타코를 생성하고 하나의 주문으로 추가하기 위해 모델 정보를 http 세션값에 저장해서 응답한다. 
+```
+### OrderController
+```
+* OrderController 참고 
 
-OrderController 참고 
+주문 컨트롤러에서는 타코 디자인 컨트롤러에서 세션값을 받고 주문을 데이터베이스에 저장한 후 세션을 완료해서 이전 세션값을 초기화한다.
+```
+```
+IngredientByIdConverter
 
-* IngredientByIdConverter
-
-JdbcIngredientRepository 에서 아이디 값으로 Ingredient 객체를 찾아서 반환하는 컨버터 클래스 
-
-IngredientByIdConverter 참고
+JdbcIngredientRepository 에서 아이디 값으로 Ingredient 객체를 찾아서 반환하는 컨버터 클래스 IngredientByIdConverter 참고
+```
 
 #### ++ 내장 H2 데이터베이스를 인터넷 클라이언트에서 사용해보기
 ```
