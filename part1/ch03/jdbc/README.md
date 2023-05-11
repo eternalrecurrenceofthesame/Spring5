@@ -134,7 +134,13 @@ private void saveTacoToOrder(Taco taco, long orderId){
 ```
 @SessionAttributes("order") 
 
-주문은 다수의 HTTP 요청에 걸쳐 존재해야 한다. 다수의 타코를 생성하고 하나의 주문으로 추가하기 위해 모델 정보를 http 세션값에 저장해서 응답한다. 
+주문은 다수의 HTTP 요청에 걸쳐 존재해야 한다. 다수의 타코를 생성하고 하나의 주문으로 추가하기 위해 모델 정보를 
+http 세션값에 저장해서 응답한다. 
+
+처음 DesignTacoController 에서 타코를 저장하고 주문 모델 값에 타코 정보를 저장한다.
+그리고 주문 모델을 사용하는 OrderController 를 호출하면 기존의 주문 모델 세션값이 HTTP 요청에 저장되어 있기 때문에
+
+주문 컨트롤러에서는 주문에 저장된 타코를 모델 값으로 사용할 수 있다. 
 ```
 ### OrderController
 ```
