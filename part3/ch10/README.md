@@ -18,7 +18,7 @@ String captialName = name.toUpperCase();
 String greeting = "Hello, " + capitalName + "!";
 System.out.println(greeting); 
 
-각 단계가 완료될 때까지 실행중인 스레드는 다음 단계로 이동하지 못한다.
+각각의 단계가 완료될 때까지 실행중인 스레드는 다음 단계로 이동하지 못한다.
 
 Mono.just("Craig").map(n -> n.toUpperCase()).map(cn -> "Hello, " + cn + "!")
                    .subscribe(System.out::println);
